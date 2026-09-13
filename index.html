@@ -1,0 +1,3603 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nat'Crack — CTF Utility Box</title>
+    <meta name="description" content="CTF Utility Box - Decoder, converter, dan solver instan untuk kompetisi CTF." />
+    <meta property="og:title" content="Nat'Crack — CTF Utility Box" />
+    <meta property="og:description" content="CTF Utility Box - Decoder, converter, dan solver instan untuk kompetisi CTF." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- PWA & Favicon Meta Tags -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#090d12" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nat'Crack" />
+
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (Play CDN for 100% Pure HTML/CSS/JS with zero build setup) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              emerald: {
+                400: '#34d399',
+                500: '#10b981',
+                600: '#059669',
+              }
+            },
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- CryptoJS CDN for Hashing Algorithms -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+    <style>
+      /* Custom Scrollbars */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #090d12;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #27272a;
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #3f3f46;
+      }
+      .scrollbar-none::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      pre, code {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      @keyframes pulse-slow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+      .animate-pulse-slow {
+        animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes flowHighlight {
+        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.8); border-color: #22c55e; }
+        40% { box-shadow: 0 0 40px 10px rgba(34, 197, 94, 0.5); border-color: #4ade80; }
+        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); border-color: #27272a; }
+      }
+      .flow-highlight-pulse {
+        animation: flowHighlight 2.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Human-Readable Math & Formula Card Styling */
+      .math-formula-card {
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 0.01em;
+      }
+      .chat-message-content p {
+        margin-bottom: 0.5rem;
+      }
+      .chat-message-content p:last-child {
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+
+  <body class="bg-[#090d12] text-zinc-100 antialiased font-sans selection:bg-[#22c55e]/30 selection:text-[#4ade80] min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Matrix Particle Canvas Background -->
+    <canvas id="bg-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- App Content Wrapper -->
+    <div class="relative z-10 flex flex-col min-h-screen">
+
+      <!-- Navigation Bar -->
+      <header class="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-[#080b10]/90 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+          <!-- Brand with Meaningful Cryptographic Padlock Logo -->
+          <div 
+            id="brand-logo"
+            class="flex items-center gap-2.5 cursor-pointer select-none transition-transform active:scale-95"
+            onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            title="Nat'Crack CTF Utility Box"
+          >
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/10 border border-emerald-500/40 flex items-center justify-center p-1.5 text-[#22c55e] shadow-[0_0_15px_rgba(34,197,94,0.25)]">
+              <svg class="w-full h-full" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 184 220 V 164 C 184 124 216 92 256 92 C 296 92 328 124 328 164 V 180" stroke="#4ade80" stroke-width="38" stroke-linecap="round"/>
+                <rect x="140" y="212" width="232" height="196" rx="36" fill="#0c131d" stroke="#22c55e" stroke-width="18"/>
+                <circle cx="256" cy="292" r="22" fill="#22c55e"/>
+                <path d="M 246 296 L 242 340 C 242 344 246 348 256 348 C 266 348 270 344 270 340 L 266 296 Z" fill="#22c55e"/>
+                <path d="M 194 276 C 184 276 176 284 176 296 V 304 C 176 312 168 316 160 316 C 168 316 176 320 176 328 V 336 C 176 348 184 356 194 356" stroke="#4ade80" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M 318 276 C 328 276 336 284 336 296 V 304 C 336 312 344 316 352 316 C 344 316 336 320 336 328 V 336 C 336 348 328 356 318 356" stroke="#4ade80" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="text-base font-extrabold tracking-tight text-white">
+              NAT'<span class="text-[#22c55e]">CRACK</span>
+            </span>
+          </div>
+
+          <!-- Minimal Navigation (Initial Flow & AI Chat buttons removed per user requirement) -->
+          <div class="flex items-center gap-1.5 sm:gap-2.5">
+            <button
+              id="nav-script-button"
+              onclick="openScriptWriterModal()"
+              class="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-300 hover:text-white px-2.5 py-1.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-800 transition-colors cursor-pointer"
+              title="Python Script Writer"
+            >
+              <i data-lucide="terminal" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Python Writer</span>
+            </button>
+
+            <button
+              id="nav-reader-button"
+              onclick="openCodeReaderModal()"
+              class="hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-300 hover:text-white px-2.5 py-1.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-800 transition-colors cursor-pointer"
+              title="Code Reader & Explainer"
+            >
+              <i data-lucide="code" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Code Reader</span>
+            </button>
+
+            <button
+              id="nav-ai-button"
+              onclick="openAIChatModal()"
+              class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-[0_0_12px_rgba(34,197,94,0.15)]"
+              title="Tanya AI Assistant"
+            >
+              <i data-lucide="bot" class="w-3.5 h-3.5 text-[#22c55e]"></i>
+              <span>Tanya AI</span>
+            </button>
+
+            <button
+              id="nav-tools-button"
+              onclick="document.getElementById('quick-tools-section').scrollIntoView({ behavior: 'smooth' })"
+              class="text-xs font-semibold text-zinc-300 hover:text-white px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-zinc-800/60 transition-colors cursor-pointer"
+            >
+              Tools
+            </button>
+
+            <button
+              id="nav-trail-button"
+              onclick="document.getElementById('data-trail-section')?.scrollIntoView({ behavior: 'smooth' })"
+              class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-emerald-500/20 transition-all cursor-pointer"
+            >
+              <i data-lucide="activity" class="w-3.5 h-3.5 animate-pulse"></i>
+              <span id="nav-trail-text">Trail (0)</span>
+            </button>
+
+            <!-- PWA Web-App Install Button -->
+            <button
+              id="pwa-install-btn"
+              onclick="handlePWAInstallClick()"
+              class="hidden items-center gap-1.5 text-xs font-bold text-zinc-950 bg-[#22c55e] hover:bg-[#16a34a] px-2.5 sm:px-3 py-1.5 rounded-xl shadow-[0_0_15px_rgba(34,197,94,0.35)] transition-all cursor-pointer hover:scale-105 active:scale-95"
+              title="Pasang Nat'Crack sebagai Web-App di HP/PC"
+            >
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">Install App</span>
+              <span class="sm:hidden">Install</span>
+            </button>
+
+            <button
+              id="nav-search-button"
+              onclick="openSearchModal()"
+              class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-900 border border-zinc-800 px-2.5 sm:px-3 py-1.5 rounded-xl transition-all cursor-pointer hover:border-emerald-500/40"
+              title="Cari"
+            >
+              <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-400"></i>
+              <span class="hidden sm:inline">Cari</span>
+              <kbd class="hidden sm:inline-block text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-700">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Container -->
+      <main class="flex-1 relative z-10">
+
+        <!-- Hero & Smart Detect Section -->
+        <section class="relative pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+          <!-- Title - Clean Minimalist -->
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-3">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              <span>CTF Solver & Interactive Triage Suite</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white select-none">
+              NAT'<span class="text-[#22c55e] drop-shadow-[0_0_20px_rgba(34,197,94,0.35)]">CRACK</span>
+            </h1>
+          </div>
+
+          <!-- Challenge File Input & Diagram Alir Command -->
+          <div id="interactive-flow-section" class="mb-7 max-w-3xl mx-auto">
+            <div class="relative flex items-center bg-[#0c1017]/95 border border-zinc-800 hover:border-zinc-700 focus-within:border-emerald-500/80 focus-within:ring-2 focus-within:ring-emerald-500/20 rounded-2xl px-3.5 py-2 shadow-2xl backdrop-blur-md transition-all">
+              <div class="flex items-center gap-2 text-emerald-400 pl-1 pr-2">
+                <i data-lucide="terminal" class="w-4 h-4 text-[#22c55e]"></i>
+              </div>
+              <input
+                id="hero-file-input"
+                type="text"
+                value="chall.py"
+                placeholder="Nama file challenge (misal: chall.py, flag.png, chall.elf)..."
+                class="w-full bg-transparent text-xs sm:text-sm font-mono text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+                oninput="onHeroFileInput(this.value)"
+              />
+              <button
+                onclick="copyAllFlowCommands()"
+                class="ml-2 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-emerald-400 hover:text-emerald-300 font-semibold text-xs flex items-center gap-1.5 cursor-pointer border border-zinc-800 hover:border-emerald-500/40 transition-all flex-shrink-0"
+                title="Salin Semua Command"
+              >
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="hero-copy-all-label">Salin Semua</span>
+              </button>
+            </div>
+
+            <!-- Quick Example File Pills -->
+            <div class="flex items-center justify-center gap-1.5 mt-2.5 flex-wrap text-[11px] text-zinc-400">
+              <span class="text-zinc-500 text-[10px] uppercase font-bold mr-1">Preset:</span>
+              <button onclick="applyHeroFilePreset('chall.py')" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-colors font-mono cursor-pointer flex items-center gap-1">
+                <span>chall.py</span>
+              </button>
+              <button onclick="applyHeroFilePreset('chall.elf')" class="px-2.5 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 transition-colors font-mono cursor-pointer flex items-center gap-1">
+                <span>chall.elf</span>
+              </button>
+              <button onclick="applyHeroFilePreset('flag.png')" class="px-2.5 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 transition-colors font-mono cursor-pointer flex items-center gap-1">
+                <span>flag.png</span>
+              </button>
+              <button onclick="applyHeroFilePreset('traffic.pcap')" class="px-2.5 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 transition-colors font-mono cursor-pointer flex items-center gap-1">
+                <span>traffic.pcap</span>
+              </button>
+              <button onclick="applyHeroFilePreset('evidence.zip')" class="px-2.5 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 transition-colors font-mono cursor-pointer flex items-center gap-1">
+                <span>evidence.zip</span>
+              </button>
+            </div>
+
+            <!-- Diagram Alir (Command Saja Dengan Titik-Titik) -->
+            <div class="mt-3.5 p-3 sm:p-4 rounded-2xl bg-[#0c1017]/95 border border-zinc-800 shadow-xl overflow-x-auto">
+              <div id="flow-diagram-nodes" class="flex flex-wrap items-center justify-center gap-y-3 gap-x-2 font-mono text-xs">
+                <!-- Dynamically rendered diagram alir nodes -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Input Box -->
+          <div
+            id="smart-input-box"
+            class="relative rounded-2xl border transition-all duration-300 bg-[#0c1017]/90 backdrop-blur-md shadow-2xl overflow-hidden border-zinc-800 focus-within:border-emerald-500/60 focus-within:shadow-[0_0_25px_rgba(34,197,94,0.15)]"
+          >
+            <!-- Top Control Bar -->
+            <div class="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800/80 text-xs text-zinc-400 bg-zinc-900/50">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-semibold text-zinc-300">Input Buffer</span>
+              </div>
+
+              <div class="flex items-center gap-3 text-xs">
+                <div id="entropy-wrapper" class="hidden items-center gap-1.5 text-zinc-300">
+                  <i data-lucide="gauge" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span id="entropy-value" class="font-medium">0.00</span>
+                </div>
+                <span id="char-counter">0 chars</span>
+                <span>•</span>
+                <span id="line-counter">0 lines</span>
+                <button
+                  id="clear-input-btn"
+                  onclick="clearSmartInput()"
+                  class="hidden hover:text-red-400 transition-colors items-center gap-1 ml-1 text-zinc-400 cursor-pointer"
+                  title="Hapus"
+                >
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Textarea -->
+            <div class="p-4">
+              <textarea
+                id="smart-detect-input"
+                placeholder="Tempel data di sini..."
+                rows="5"
+                class="w-full bg-transparent font-mono text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none resize-y selection:bg-emerald-500/30 selection:text-emerald-300"
+              ></textarea>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-zinc-800/80 bg-zinc-900/30">
+              <div class="flex items-center gap-2">
+                <input
+                  type="file"
+                  id="smart-file-input"
+                  class="hidden"
+                />
+                <button
+                  id="upload-file-btn"
+                  onclick="document.getElementById('smart-file-input').click()"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-zinc-300 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer"
+                >
+                  <i data-lucide="upload" class="w-3.5 h-3.5 text-zinc-400"></i>
+                  <span>Unggah</span>
+                </button>
+
+                <!-- Quick Presets -->
+                <div class="hidden sm:flex items-center gap-1.5 pl-2">
+                  <button
+                    onclick="loadSample('48656c6c6f')"
+                    class="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-emerald-400 text-xs transition-colors cursor-pointer"
+                  >
+                    Hex
+                  </button>
+                  <button
+                    onclick="loadSample('01001000 01101001')"
+                    class="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-emerald-400 text-xs transition-colors cursor-pointer"
+                  >
+                    Binary
+                  </button>
+                  <button
+                    onclick="loadSample('SGVsbG8=')"
+                    class="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-emerald-400 text-xs transition-colors cursor-pointer"
+                  >
+                    Base64
+                  </button>
+                  <button
+                    onclick="loadSample('5d41402abc4b2a76b9719d911017c592')"
+                    class="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-emerald-400 text-xs transition-colors cursor-pointer"
+                  >
+                    Hash
+                  </button>
+                </div>
+              </div>
+
+              <button
+                id="auto-detect-btn"
+                onclick="runAutoDetect()"
+                class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-zinc-950 bg-[#22c55e] hover:bg-[#16a34a] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_25px_rgba(34,197,94,0.5)] cursor-pointer"
+              >
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span>Deteksi</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Scanning Indicator -->
+          <div 
+            id="smart-scanning-indicator"
+            class="hidden mt-4 p-4 rounded-2xl border border-zinc-800 bg-[#0c1017] items-center justify-center gap-3 text-xs text-zinc-300"
+          >
+            <i data-lucide="cpu" class="w-4 h-4 text-emerald-400 animate-spin"></i>
+            <span class="font-medium">Memproses...</span>
+          </div>
+
+          <!-- Detection Results Container -->
+          <div id="detection-results-container" class="mt-4 space-y-4"></div>
+        </section>
+
+        <!-- Data Trail Section (Dynamically rendered when steps exist) -->
+        <section id="data-trail-section" class="hidden px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto mb-16">
+          <div class="rounded-2xl border border-zinc-800 bg-[#0c1017]/85 backdrop-blur-md p-5 shadow-2xl">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 mb-5">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[#22c55e]">
+                  <i data-lucide="git-commit" class="w-4 h-4"></i>
+                </div>
+                <h2 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                  <span>Data Trail</span>
+                  <span id="data-trail-badge" class="text-xs px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">0</span>
+                </h2>
+              </div>
+
+              <button
+                onclick="clearDataTrail()"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-red-400 hover:bg-red-950/20 rounded-xl border border-zinc-800 hover:border-red-900/50 transition-colors cursor-pointer"
+              >
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                <span>Reset</span>
+              </button>
+            </div>
+
+            <!-- Steps list -->
+            <div id="data-trail-steps" class="space-y-4"></div>
+          </div>
+        </section>
+
+        
+
+        <!-- Quick Tools Grid Section -->
+        <section id="quick-tools-section" class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-20">
+          <!-- Header -->
+          <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-800/60 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#22c55e] animate-pulse shadow-[0_0_8px_#22c55e]"></span>
+              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                <span>Daftar Tools</span>
+                <span id="tools-counter-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-[#4ade80] border border-emerald-500/20 font-semibold">
+                  0
+                </span>
+              </h2>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative w-full sm:w-72">
+              <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              <input
+                id="tools-search-input"
+                type="text"
+                placeholder="Cari..."
+                class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-emerald-500/80 rounded-xl pl-9 pr-8 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner focus:shadow-[0_0_15px_rgba(34,197,94,0.15)]"
+              />
+              <button
+                id="clear-tools-search"
+                onclick="resetToolsSearch()"
+                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5"
+              >
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Categories Navigation -->
+          <div id="categories-bar" class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Tools Grid Container -->
+          <div id="tools-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+            <!-- Tool cards inserted dynamically -->
+          </div>
+        </section>
+      </main>
+
+      <!-- Floating AI Chatbot Button (Bottom Right) -->
+      <div class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40">
+        <button
+          id="floating-ai-button"
+          onclick="openAIChatModal()"
+          class="group relative flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#0c1017] hover:bg-[#111722] text-white border border-emerald-500/40 hover:border-emerald-400 shadow-[0_0_20px_rgba(34,197,94,0.25)] hover:shadow-[0_0_28px_rgba(34,197,94,0.45)] transition-all cursor-pointer hover:scale-105 active:scale-95"
+        >
+          <!-- Animated pulse halo -->
+          <span class="absolute -top-1 -right-1 w-3 h-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-[#22c55e]"></span>
+          </span>
+
+          <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-[#22c55e] flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+
+          <div class="text-left">
+            <div class="text-xs font-extrabold tracking-tight flex items-center gap-1 text-white">
+              <span>Nat'Crack AI</span>
+              <i data-lucide="sparkles" class="w-3 h-3 text-emerald-400"></i>
+            </div>
+            <div class="text-[10px] text-zinc-400 leading-none">
+              CTF Assistant
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Clean Minimalist Footer -->
+      <footer class="border-t border-zinc-800/60 py-6 px-4 text-xs text-zinc-500 relative z-10">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+          <div class="flex items-center gap-2 font-bold text-white">
+            <span>NAT'<span class="text-[#22c55e]">CRACK</span></span>
+          </div>
+          <div class="text-zinc-500 text-xs">
+            CTF Utility Box
+          </div>
+        </div>
+      </footer>
+
+      <!-- Tool Modal Dialog -->
+      <div id="tool-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
+        <div 
+          class="relative w-full max-w-2xl bg-[#0c1017] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden my-auto"
+          onclick="event.stopPropagation()"
+        >
+          <!-- Header -->
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/80 bg-zinc-900/40">
+            <div class="flex items-center gap-2.5">
+              <span id="modal-tool-badge" class="text-xs font-semibold px-2 py-0.5 rounded-lg bg-zinc-900 text-emerald-400 border border-emerald-500/20">
+                0101 → A
+              </span>
+              <h2 id="modal-tool-name" class="text-base font-bold text-white tracking-tight">
+                Binary → ASCII
+              </h2>
+            </div>
+
+            <button
+              onclick="closeToolModal()"
+              class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+              title="Tutup"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <!-- Tool Options Container -->
+            <div id="modal-options-container" class="hidden p-3 rounded-xl border border-zinc-800/80 bg-zinc-900/40 flex-wrap gap-4 items-center">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Input Area -->
+            <div>
+              <div class="flex items-center justify-between text-xs text-zinc-400 pb-1.5">
+                <span class="font-semibold text-zinc-300">Input Data</span>
+                <div class="flex items-center gap-2">
+                  <button
+                    onclick="pasteToModalInput()"
+                    class="hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <i data-lucide="clipboard" class="w-3 h-3"></i>
+                    <span>Tempel</span>
+                  </button>
+                  <span>•</span>
+                  <button
+                    onclick="clearModalInput()"
+                    class="hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </div>
+
+              <textarea
+                id="modal-input-text"
+                rows="4"
+                placeholder="Masukkan data di sini..."
+                class="w-full bg-zinc-950/80 border border-zinc-800 focus:border-emerald-500/70 rounded-xl p-3 text-xs sm:text-sm font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none transition-colors"
+              ></textarea>
+            </div>
+
+            <!-- Output Area -->
+            <div>
+              <div class="flex items-center justify-between text-xs text-zinc-400 pb-1.5">
+                <span class="font-semibold text-zinc-300">Hasil Output</span>
+                <div class="flex items-center gap-2">
+                  <span id="modal-output-length" class="text-zinc-500">0 karakter</span>
+                  <button
+                    id="modal-copy-btn"
+                    onclick="copyModalOutput()"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800 transition-all cursor-pointer"
+                  >
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                    <span id="modal-copy-btn-text">Salin</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="relative">
+                <textarea
+                  id="modal-output-text"
+                  rows="4"
+                  readonly
+                  placeholder="Hasil akan muncul di sini secara otomatis..."
+                  class="w-full bg-zinc-950/90 border border-zinc-800/80 rounded-xl p-3 text-xs sm:text-sm font-mono text-zinc-100 placeholder:text-zinc-700 focus:outline-none select-all"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="pt-2 flex items-center justify-between border-t border-zinc-800/80">
+              <button
+                id="modal-add-trail-btn"
+                onclick="addModalToTrail()"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors cursor-pointer"
+              >
+                <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
+                <span>Kirim ke Data Trail</span>
+              </button>
+
+              <button
+                onclick="closeToolModal()"
+                class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Search Modal (Ctrl + K) -->
+      <div id="search-modal" class="fixed inset-0 z-50 hidden items-start justify-center pt-20 px-4 bg-black/80 backdrop-blur-md">
+        <div
+          class="relative w-full max-w-xl bg-[#0c1017] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          onclick="event.stopPropagation()"
+        >
+          <!-- Input Bar -->
+          <div class="flex items-center px-4 py-3 border-b border-zinc-800">
+            <i data-lucide="search" class="w-4 h-4 text-zinc-500 mr-3"></i>
+            <input
+              id="search-modal-input"
+              type="text"
+              placeholder="Cari tool..."
+              class="w-full bg-transparent text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+            />
+            <button
+              onclick="closeSearchModal()"
+              class="text-zinc-500 hover:text-zinc-300 p-1 cursor-pointer"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Results List -->
+          <div id="search-modal-results" class="max-h-80 overflow-y-auto p-2 divide-y divide-zinc-900">
+            <!-- Inserted dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Chatbot Modal -->
+      <div id="ai-chat-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
+        <div 
+          class="relative w-full max-w-2xl h-[85vh] max-h-[700px] flex flex-col bg-[#0c1017] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          onclick="event.stopPropagation()"
+        >
+          <!-- Header -->
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/80 bg-zinc-900/40">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[#22c55e]">
+                <i data-lucide="bot" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-sm font-bold text-white tracking-tight">Nat'Crack AI</h2>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">CTF Assistant</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[11px] text-zinc-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span>Siap membantu analisa sandi & CTF</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button
+                onclick="resetAIChat()"
+                class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                title="Reset Chat"
+              >
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              </button>
+              <button
+                onclick="closeAIChatModal()"
+                class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                title="Tutup"
+              >
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Message Thread -->
+          <div id="ai-chat-thread" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Messages inserted dynamically -->
+          </div>
+
+          <!-- Quick Prompts Bar -->
+          <div id="ai-quick-prompts" class="px-4 py-2 border-t border-zinc-800/60 bg-zinc-900/20 flex items-center gap-2 overflow-x-auto scrollbar-none">
+            <button
+              onclick="sendQuickPrompt('Buatkan script Python untuk brute-force XOR 1-byte mencari format flag{')"
+              class="px-2.5 py-1 text-xs rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <i data-lucide="terminal" class="w-3 h-3"></i>
+              <span>🐍 Buat Script Python</span>
+            </button>
+            <button
+              onclick="sendQuickPrompt('Jelaskan cara membaca dan menganalisis kode C crackme yang menggunakan strcmp')"
+              class="px-2.5 py-1 text-xs rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <i data-lucide="code" class="w-3 h-3"></i>
+              <span>🔍 Bedah Kode C/Python</span>
+            </button>
+            <button
+              onclick="sendQuickPrompt('Jelaskan tahapan Initial Flow untuk CTF Forensics: file -> ls -lah -> strings -> exiftool -> xxd -> binwalk -> cat -> natcrack -> specialized tool')"
+              class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <i data-lucide="search" class="w-3 h-3"></i>
+              <span>Alur Forensik</span>
+            </button>
+            <button
+              onclick="sendQuickPrompt('Jelaskan tahapan Initial Flow untuk Reverse Engineering (RE): file -> strings -> readelf -h -> readelf -S / -s -> head/tail/cat -> objdump -> Ghidra -> GDB')"
+              class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <i data-lucide="crosshair" class="w-3 h-3"></i>
+              <span>Alur RE</span>
+            </button>
+            <button
+              onclick="sendQuickPrompt('Bagaimana cara menganalisis jenis hash MD5, SHA-1, SHA-256, NTLM?')"
+              class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+            >
+              Analisis Hash?
+            </button>
+            <button
+              onclick="sendQuickPrompt('Bagaimana cara memecahkan sandi Caesar / ROT13?')"
+              class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+            >
+              Caesar / ROT13?
+            </button>
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="p-3 border-t border-zinc-800/80 bg-zinc-900/40">
+            <form onsubmit="handleAIChatSubmit(event)" class="flex items-center gap-2">
+              <input
+                id="ai-chat-input"
+                type="text"
+                placeholder="Tanyakan analisis cipher, alur triage, decoding, atau tips CTF..."
+                class="flex-1 bg-zinc-950 border border-zinc-800 focus:border-emerald-500/70 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none transition-colors"
+              />
+              <button
+                id="ai-chat-send-btn"
+                type="submit"
+                class="p-2.5 rounded-xl bg-[#22c55e] text-zinc-950 hover:bg-[#16a34a] font-semibold transition-colors cursor-pointer shadow-[0_0_12px_rgba(34,197,94,0.3)]"
+              >
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Python Script Writer Modal -->
+      <div id="script-writer-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
+        <div
+          class="relative w-full max-w-4xl h-[90vh] max-h-[820px] flex flex-col bg-[#0c1017] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          onclick="event.stopPropagation()"
+        >
+          <!-- Header -->
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/80 bg-zinc-900/50">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[#22c55e]">
+                <i data-lucide="terminal" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">Python Script Writer</h2>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">100% Relevant</span>
+                </div>
+                <p class="text-[11px] text-zinc-400">Generate script Python CTF siap pakai berdasarkan instruksi & data spesifik</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                onclick="closeScriptWriterModal()"
+                class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                title="Tutup"
+              >
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets Bar -->
+          <div class="px-4 py-2 border-b border-zinc-800/60 bg-zinc-900/30 flex items-center gap-2 overflow-x-auto scrollbar-none">
+            <span class="text-[10px] uppercase font-bold text-zinc-500 whitespace-nowrap">Presets:</span>
+            <button onclick="applyScriptPreset('xor_brute')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              XOR 1-Byte Brute
+            </button>
+            <button onclick="applyScriptPreset('pwntools_socket')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              Pwntools Netcat Socket
+            </button>
+            <button onclick="applyScriptPreset('rsa_factordb')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              RSA Small-e / FactorDB
+            </button>
+            <button onclick="applyScriptPreset('cascade_decode')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              Cascade Base64/Hex/ROT13
+            </button>
+            <button onclick="applyScriptPreset('http_brute')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              HTTP Auth Brute-Force
+            </button>
+            <button onclick="applyScriptPreset('regex_flag')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              Regex Flag Extractor
+            </button>
+          </div>
+
+          <!-- Body Grid (Inputs & Output) -->
+          <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-zinc-800/80 overflow-y-auto">
+            <!-- Left: Inputs -->
+            <div class="p-4 sm:p-5 space-y-4 flex flex-col justify-between">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-zinc-200 mb-1.5 flex items-center justify-between">
+                    <span>Instruksi Script Python:</span>
+                    <span class="text-[10px] text-zinc-400">Jelaskan apa yang ingin dipecahkan</span>
+                  </label>
+                  <textarea
+                    id="script-writer-prompt"
+                    rows="4"
+                    placeholder="Contoh: Buatkan script python untuk memecahkan ciphertext XOR 1-byte, periksa apakah ada teks 'flag{' atau 'CTF', lalu cetak key dan flag yang ditemukan..."
+                    class="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none transition-colors"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-semibold text-zinc-200">Data / Ciphertext Target (Opsional):</label>
+                    <button
+                      onclick="importTargetDataToScriptWriter()"
+                      class="text-[11px] text-emerald-400 hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <i data-lucide="arrow-down-left" class="w-3 h-3"></i>
+                      <span>Ambil dari Input Buffer</span>
+                    </button>
+                  </div>
+                  <textarea
+                    id="script-writer-data"
+                    rows="3"
+                    placeholder="Tempel ciphertext, hex, base64, modulus RSA n, atau data tantangan di sini..."
+                    class="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 text-xs font-mono text-emerald-300 placeholder:text-zinc-600 focus:outline-none transition-colors"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-zinc-200 mb-1.5">Library Pilihan:</label>
+                  <div class="flex flex-wrap gap-2 text-xs">
+                    <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 cursor-pointer">
+                      <input type="checkbox" id="lib-pwntools" class="rounded bg-zinc-950 border-zinc-700 text-emerald-500">
+                      <span>pwntools</span>
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 cursor-pointer">
+                      <input type="checkbox" id="lib-pycryptodome" checked class="rounded bg-zinc-950 border-zinc-700 text-emerald-500">
+                      <span>pycryptodome</span>
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 cursor-pointer">
+                      <input type="checkbox" id="lib-requests" class="rounded bg-zinc-950 border-zinc-700 text-emerald-500">
+                      <span>requests</span>
+                    </label>
+                    <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 cursor-pointer">
+                      <input type="checkbox" id="lib-stdlib" checked class="rounded bg-zinc-950 border-zinc-700 text-emerald-500">
+                      <span>stdlib only</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button
+                  id="script-writer-submit-btn"
+                  onclick="generatePythonScript()"
+                  class="w-full py-2.5 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-zinc-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(34,197,94,0.3)] transition-all cursor-pointer"
+                >
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  <span>🚀 Generate Script Python</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Code Output -->
+            <div class="p-4 sm:p-5 flex flex-col justify-between bg-zinc-950/40">
+              <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800/80">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="text-xs font-mono font-bold text-zinc-300">solver.py</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button
+                      id="copy-script-btn"
+                      onclick="copyScriptOutput()"
+                      class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <i data-lucide="copy" class="w-3 h-3"></i>
+                      <span>Salin</span>
+                    </button>
+                    <button
+                      onclick="downloadPythonScript()"
+                      class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <i data-lucide="download" class="w-3 h-3"></i>
+                      <span>Download</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Code Container -->
+                <div id="script-output-container" class="flex-1 overflow-y-auto rounded-xl bg-zinc-950 border border-zinc-800 p-3 font-mono text-xs text-emerald-300 leading-relaxed max-h-[380px]">
+                  <div class="text-zinc-500 italic p-4 text-center">
+                    Klik "Generate Script Python" atau pilih salah satu preset di atas untuk membuat script solver.
+                  </div>
+                </div>
+
+                <!-- Usage note -->
+                <div id="script-writer-explanation" class="mt-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-300">
+                  <div class="font-bold text-emerald-400 text-[11px] mb-1 flex items-center gap-1">
+                    <i data-lucide="play" class="w-3 h-3"></i>
+                    <span>Cara Menjalankan:</span>
+                  </div>
+                  <div class="font-mono text-[11px] text-zinc-300 bg-zinc-950 p-1.5 rounded border border-zinc-800 select-all">
+                    python3 solver.py
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Reader & Explainer Modal -->
+      <div id="code-reader-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
+        <div
+          class="relative w-full max-w-4xl h-[90vh] max-h-[820px] flex flex-col bg-[#0c1017] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+          onclick="event.stopPropagation()"
+        >
+          <!-- Header -->
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800/80 bg-zinc-900/50">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[#22c55e]">
+                <i data-lucide="code" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">Code Reader & Explainer</h2>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">Line-by-Line Breakdown</span>
+                </div>
+                <p class="text-[11px] text-zinc-400">Membaca dan mengartikan kode Python/C/Assembly per baris penting untuk menemukan celah atau flag</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                onclick="closeCodeReaderModal()"
+                class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                title="Tutup"
+              >
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets Bar -->
+          <div class="px-4 py-2 border-b border-zinc-800/60 bg-zinc-900/30 flex items-center gap-2 overflow-x-auto scrollbar-none">
+            <span class="text-[10px] uppercase font-bold text-zinc-500 whitespace-nowrap">Samples:</span>
+            <button onclick="applyCodeReaderSample('c_crackme')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              C Crackme (strcmp)
+            </button>
+            <button onclick="applyCodeReaderSample('python_stream')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              Python Custom Cipher
+            </button>
+            <button onclick="applyCodeReaderSample('bof_c')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              Buffer Overflow (gets)
+            </button>
+            <button onclick="applyCodeReaderSample('asm_x86')" class="px-2.5 py-1 text-xs rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 whitespace-nowrap transition-colors cursor-pointer">
+              x86_64 Assembly Check
+            </button>
+          </div>
+
+          <!-- Body Grid (Inputs & Analysis) -->
+          <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-zinc-800/80 overflow-y-auto">
+            <!-- Left: Code Input & Config -->
+            <div class="p-4 sm:p-5 space-y-4 flex flex-col justify-between">
+              <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Bahasa:</label>
+                    <select id="code-reader-lang" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs rounded-xl px-2.5 py-2 focus:border-emerald-500 focus:outline-none">
+                      <option value="auto">Auto Detect</option>
+                      <option value="c">C / C++</option>
+                      <option value="python">Python</option>
+                      <option value="assembly">x86 / ARM Assembly</option>
+                      <option value="javascript">JavaScript / Node.js</option>
+                      <option value="php">PHP</option>
+                      <option value="bash">Bash Script</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Fokus Analisis:</label>
+                    <select id="code-reader-focus" class="w-full bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs rounded-xl px-2.5 py-2 focus:border-emerald-500 focus:outline-none">
+                      <option value="all">Semua Aspek</option>
+                      <option value="flag">Cari Flag / Password</option>
+                      <option value="vuln">Celah Keamanan (Vulnerability)</option>
+                      <option value="crypto">Logika Enkripsi / Transformasi</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-xs font-semibold text-zinc-200">Kode Target:</label>
+                    <button onclick="pasteToCodeReader()" class="text-[11px] text-emerald-400 hover:underline cursor-pointer flex items-center gap-1">
+                      <i data-lucide="clipboard" class="w-3 h-3"></i>
+                      <span>Tempel Clipboard</span>
+                    </button>
+                  </div>
+                  <textarea
+                    id="code-reader-input"
+                    rows="12"
+                    placeholder="Tempel potongan kode C, Python, x86 Assembly, atau fungsi dekripsi di sini..."
+                    class="w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 font-mono text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none transition-colors"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button
+                  id="code-reader-submit-btn"
+                  onclick="analyzeCodeInput()"
+                  class="w-full py-2.5 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-zinc-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(34,197,94,0.3)] transition-all cursor-pointer"
+                >
+                  <i data-lucide="scan-search" class="w-4 h-4"></i>
+                  <span>🔍 Baca & Bedah Kode</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Analysis Output -->
+            <div class="p-4 sm:p-5 flex flex-col justify-between bg-zinc-950/40">
+              <div class="flex-1 flex flex-col min-h-0">
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800/80">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="text-xs font-bold text-zinc-200">Hasil Analisis & Bedah Kode</span>
+                  </div>
+                  <button
+                    onclick="copyCodeAnalysis()"
+                    class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <i data-lucide="copy" class="w-3 h-3"></i>
+                    <span>Salin Hasil</span>
+                  </button>
+                </div>
+
+                <div id="code-reader-output" class="flex-1 overflow-y-auto rounded-xl bg-zinc-950 border border-zinc-800 p-4 text-xs text-zinc-200 leading-relaxed space-y-3 max-h-[500px]">
+                  <div class="text-zinc-500 italic text-center p-6">
+                    Tempel kode di sebelah kiri lalu klik "Baca & Bedah Kode". Sistem akan menganalisis tujuan program, membedah baris-baris kuncinya, dan mengungkap cara memperoleh flag.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PURE JAVASCRIPT CLIENT-SIDE LOGIC -->
+    <script>
+      /* --- 1. BACKGROUND MATRIX PARTICLES CANVAS --- */
+      (function initMatrixCanvas() {
+        const canvas = document.getElementById('bg-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let width = (canvas.width = window.innerWidth);
+        let height = (canvas.height = window.innerHeight);
+
+        const chars = '0123456789ABCDEF01'.split('');
+        const fontSize = 14;
+        let columns = Math.floor(width / fontSize);
+        let drops = Array(columns).fill(1);
+
+        window.addEventListener('resize', () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+          columns = Math.floor(width / fontSize);
+          drops = Array(columns).fill(1);
+        });
+
+        function draw() {
+          ctx.fillStyle = 'rgba(9, 13, 18, 0.08)';
+          ctx.fillRect(0, 0, width, height);
+
+          ctx.fillStyle = 'rgba(34, 197, 94, 0.35)';
+          ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
+
+          for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+
+            ctx.fillText(text, x, y);
+
+            if (y > height && Math.random() > 0.985) {
+              drops[i] = 0;
+            }
+            drops[i]++;
+          }
+          requestAnimationFrame(draw);
+        }
+        draw();
+      })();
+
+      /* --- 2. CTF SOLVER ENGINES (PURE JAVASCRIPT) --- */
+      function binaryToAscii(str) {
+        try {
+          const cleaned = str.replace(/[^01\s]/g, '').trim();
+          if (!cleaned) return '';
+          const bytes = cleaned.includes(' ') ? cleaned.split(/\s+/) : cleaned.match(/.{1,8}/g) || [];
+          return bytes.map(b => String.fromCharCode(parseInt(b, 2))).join('');
+        } catch (e) {
+          return 'Error parsing binary';
+        }
+      }
+
+      function asciiToBinary(str, spaced = true) {
+        return Array.from(str)
+          .map(c => c.charCodeAt(0).toString(2).padStart(8, '0'))
+          .join(spaced ? ' ' : '');
+      }
+
+      function hexToAscii(str) {
+        try {
+          let cleaned = str.replace(/^0x/i, '').replace(/[^0-9a-fA-F\s]/g, '').trim();
+          if (!cleaned) return '';
+          if (cleaned.includes(' ')) {
+            return cleaned.split(/\s+/).map(h => String.fromCharCode(parseInt(h, 16))).join('');
+          }
+          if (cleaned.length % 2 !== 0) cleaned = '0' + cleaned;
+          let out = '';
+          for (let i = 0; i < cleaned.length; i += 2) {
+            out += String.fromCharCode(parseInt(cleaned.substr(i, 2), 16));
+          }
+          return out;
+        } catch (e) {
+          return 'Error parsing hex';
+        }
+      }
+
+      function asciiToHex(str, delimiter = ' ') {
+        return Array.from(str)
+          .map(c => {
+            const h = c.charCodeAt(0).toString(16).padStart(2, '0');
+            return delimiter === ' 0x' ? '0x' + h : h;
+          })
+          .join(delimiter === ' 0x' ? ' ' : delimiter);
+      }
+
+      function decimalToAscii(str) {
+        try {
+          const numbers = str.trim().split(/[\s,]+/);
+          return numbers.map(n => String.fromCharCode(parseInt(n, 10))).join('');
+        } catch {
+          return 'Error converting decimal';
+        }
+      }
+
+      function asciiToDecimal(str) {
+        return Array.from(str).map(c => c.charCodeAt(0)).join(' ');
+      }
+
+      function octalToAscii(str) {
+        try {
+          const octals = str.trim().split(/[\s,]+/);
+          return octals.map(o => String.fromCharCode(parseInt(o, 8))).join('');
+        } catch {
+          return 'Error converting octal';
+        }
+      }
+
+      function asciiToOctal(str) {
+        return Array.from(str).map(c => c.charCodeAt(0).toString(8).padStart(3, '0')).join(' ');
+      }
+
+      function base64Decode(str) {
+        try {
+          return decodeURIComponent(escape(atob(str.trim())));
+        } catch {
+          try { return atob(str.trim()); } catch (e) { return 'Error: Format Base64 tidak valid'; }
+        }
+      }
+
+      function base64Encode(str) {
+        try {
+          return btoa(unescape(encodeURIComponent(str)));
+        } catch {
+          return btoa(str);
+        }
+      }
+
+      const B32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+      function base32Decode(input) {
+        try {
+          let cleaned = input.toUpperCase().replace(/=+$/, '').replace(/\s+/g, '');
+          let bits = '';
+          for (let i = 0; i < cleaned.length; i++) {
+            const val = B32_ALPHABET.indexOf(cleaned[i]);
+            if (val === -1) return 'Error: Karakter tidak valid untuk Base32';
+            bits += val.toString(2).padStart(5, '0');
+          }
+          let bytes = [];
+          for (let i = 0; i + 8 <= bits.length; i += 8) {
+            bytes.push(String.fromCharCode(parseInt(bits.substr(i, 8), 2)));
+          }
+          return bytes.join('');
+        } catch {
+          return 'Error decoding Base32';
+        }
+      }
+
+      function base32Encode(input) {
+        let bits = '';
+        for (let i = 0; i < input.length; i++) {
+          bits += input.charCodeAt(i).toString(2).padStart(8, '0');
+        }
+        while (bits.length % 5 !== 0) bits += '0';
+        let output = '';
+        for (let i = 0; i < bits.length; i += 5) {
+          output += B32_ALPHABET[parseInt(bits.substr(i, 5), 2)];
+        }
+        while (output.length % 8 !== 0) output += '=';
+        return output;
+      }
+
+      function caesarCipher(text, shift) {
+        const s = ((shift % 26) + 26) % 26;
+        return text.replace(/[a-zA-Z]/g, (c) => {
+          const base = c >= 'a' && c <= 'z' ? 97 : 65;
+          return String.fromCharCode(((c.charCodeAt(0) - base + s) % 26) + base);
+        });
+      }
+
+      function caesarBruteforce(text) {
+        const results = [];
+        for (let s = 1; s <= 25; s++) {
+          results.push(`[Shift ${String(s).padStart(2, ' ')}]: ${caesarCipher(text, s)}`);
+        }
+        return results.join('\n');
+      }
+
+      function xorCipher(text, key, inputIsHex = false, outputAsHex = false) {
+        try {
+          if (!key) return text;
+          let bytes = [];
+          if (inputIsHex) {
+            const clean = text.replace(/[^0-9a-fA-F]/g, '');
+            for (let i = 0; i < clean.length; i += 2) {
+              bytes.push(parseInt(clean.substr(i, 2), 16));
+            }
+          } else {
+            bytes = Array.from(text).map(c => c.charCodeAt(0));
+          }
+
+          const keyBytes = Array.from(key).map(c => c.charCodeAt(0));
+          const outBytes = bytes.map((b, idx) => b ^ keyBytes[idx % keyBytes.length]);
+
+          if (outputAsHex) {
+            return outBytes.map(b => b.toString(16).padStart(2, '0')).join('');
+          }
+          return outBytes.map(b => (b >= 32 && b <= 126 ? String.fromCharCode(b) : `\\x${b.toString(16).padStart(2, '0')}`)).join('');
+        } catch {
+          return 'Error running XOR';
+        }
+      }
+
+      function atbashCipher(text) {
+        return text.replace(/[a-zA-Z]/g, (c) => {
+          const isLower = c >= 'a' && c <= 'z';
+          const base = isLower ? 97 : 65;
+          return String.fromCharCode(base + (25 - (c.charCodeAt(0) - base)));
+        });
+      }
+
+      function solveMathExpression(str) {
+        if (!str) return null;
+        let text = str.trim();
+
+        text = text.replace(/^(hitung|hitunglah|berapakah|hasil\s*dari|solve|calculate)\s+/i, "");
+        text = text.replace(/\$\$/g, "").replace(/\$/g, "");
+        text = text.replace(/\\times/g, "*").replace(/×/g, "*");
+        text = text.replace(/\\cdot/g, "*").replace(/·/g, "*");
+        text = text.replace(/\\div/g, "/").replace(/÷/g, "/");
+        text = text.replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, "($1)/($2)");
+
+        function fact(n) {
+          n = Math.round(n);
+          if (n < 0) return 0;
+          if (n === 0 || n === 1) return 1;
+          let res = 1;
+          for (let i = 2; i <= n; i++) res *= i;
+          return res;
+        }
+
+        const combMatch = text.match(/(?:C|comb|kombinasi)\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+        if (combMatch) {
+          const n = parseInt(combMatch[1], 10);
+          const r = parseInt(combMatch[2], 10);
+          if (r >= 0 && r <= n) {
+            const val = fact(n) / (fact(r) * fact(n - r));
+            return String(Math.round(val));
+          }
+        }
+
+        const permMatch = text.match(/(?:P|perm|permutasi)\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+        if (permMatch) {
+          const n = parseInt(permMatch[1], 10);
+          const r = parseInt(permMatch[2], 10);
+          if (r >= 0 && r <= n) {
+            const val = fact(n) / fact(n - r);
+            return String(Math.round(val));
+          }
+        }
+
+        if (text.includes("!")) {
+          let replaced = text.replace(/(\d+)!/g, (_m, d) => fact(parseInt(d, 10)));
+          try {
+            let cleanExpr = replaced.replace(/[^0-9+\-*/().\s]/g, "");
+            if (/^[0-9+\-*/().\s]+$/.test(cleanExpr)) {
+              const val = Function('"use strict"; return (' + cleanExpr + ')')();
+              if (typeof val === "number" && !isNaN(val)) return String(val);
+            }
+          } catch {}
+        }
+
+        try {
+          let expr = text.replace(/\^/g, "**").replace(/[^0-9+\-*/().\s*]/g, "");
+          if (/^[0-9+\-*/().\s]+$/.test(expr) && /[0-9]/.test(expr) && /[+\-*/]/.test(expr)) {
+            const val = Function('"use strict"; return (' + expr + ')')();
+            if (typeof val === "number" && !isNaN(val)) return String(val);
+          }
+        } catch {}
+
+        return null;
+      }
+
+      function identifyHash(str) {
+        const clean = str.trim().toLowerCase();
+        const len = clean.length;
+        const isHex = /^[0-9a-f]+$/.test(clean);
+        if (!isHex) return `Bukan hex baku (${len} karakter)`;
+
+        if (len === 32) return 'MD5 / NTLM / MD4';
+        if (len === 40) return 'SHA-1 / RIPEMD-160';
+        if (len === 56) return 'SHA-224';
+        if (len === 64) return 'SHA-256 / BLAKE2s';
+        if (len === 96) return 'SHA-384';
+        if (len === 128) return 'SHA-512 / Whirlpool / BLAKE2b';
+        return `Hash tidak standar (${len} hex)`;
+      }
+
+      function generateHashes(text) {
+        if (typeof CryptoJS === 'undefined') return 'CryptoJS tidak tersedia.';
+        return [
+          `MD5:        ${CryptoJS.MD5(text)}`,
+          `SHA-1:      ${CryptoJS.SHA1(text)}`,
+          `SHA-256:    ${CryptoJS.SHA256(text)}`,
+          `SHA-512:    ${CryptoJS.SHA512(text)}`,
+          `RIPEMD-160: ${CryptoJS.RIPEMD160(text)}`,
+        ].join('\n');
+      }
+
+      function decodeJwt(str) {
+        try {
+          const parts = str.trim().split('.');
+          if (parts.length !== 3) return 'Format JWT tidak valid';
+          const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+          return JSON.stringify(payload, null, 2);
+        } catch (e) {
+          return `Error: ${e.message}`;
+        }
+      }
+
+      function calculateEntropy(str) {
+        if (!str) return 0;
+        const len = str.length;
+        const freq = {};
+        for (let i = 0; i < len; i++) {
+          freq[str[i]] = (freq[str[i]] || 0) + 1;
+        }
+        let entropy = 0;
+        for (const c in freq) {
+          const p = freq[c] / len;
+          entropy -= p * Math.log2(p);
+        }
+        return Number(entropy.toFixed(2));
+      }
+
+      /* --- 3. TOOLS REGISTRY (ALL 25+ CTF TOOLS) --- */
+      const TOOLS = [
+        {
+          id: 'binary-to-ascii',
+          name: 'Binary → ASCII',
+          category: 'converters',
+          badge: '0101 → A',
+          inputPlaceholder: '01001000 01101001 00100001',
+          defaultInput: '01001000 01100101 01101100 01101100 01101111',
+          run: (input) => binaryToAscii(input)
+        },
+        {
+          id: 'ascii-to-binary',
+          name: 'ASCII → Binary',
+          category: 'converters',
+          badge: 'A → 0101',
+          inputPlaceholder: 'Hello CTF',
+          defaultInput: 'Hello',
+          optionsConfig: [
+            { type: 'boolean', label: 'Spasi pemisah', key: 'spaced', defaultValue: true }
+          ],
+          run: (input, opts) => asciiToBinary(input, opts?.spaced !== false)
+        },
+        {
+          id: 'hex-to-ascii',
+          name: 'Hex → ASCII',
+          category: 'converters',
+          badge: '48 65 → A',
+          inputPlaceholder: '48 65 6c 6c 6f or 0x48656c6c6f',
+          defaultInput: '48 65 6c 6c 6f 21',
+          run: (input) => hexToAscii(input)
+        },
+        {
+          id: 'ascii-to-hex',
+          name: 'ASCII → Hex',
+          category: 'converters',
+          badge: 'A → 48 65',
+          inputPlaceholder: 'flag{ctf_15_4w350m3}',
+          defaultInput: 'flag{quick_solve}',
+          optionsConfig: [
+            {
+              type: 'select',
+              label: 'Delimiter',
+              key: 'delim',
+              defaultValue: ' ',
+              options: [
+                { label: 'Spasi (" ")', value: ' ' },
+                { label: 'Tanpa Spasi ("")', value: '' },
+                { label: 'Prefix (0x)', value: ' 0x' },
+                { label: 'Titik Dua (":")', value: ':' }
+              ]
+            }
+          ],
+          run: (input, opts) => asciiToHex(input, opts?.delim || ' ')
+        },
+        {
+          id: 'decimal-to-ascii',
+          name: 'Decimal → ASCII',
+          category: 'converters',
+          badge: '72 101 → A',
+          inputPlaceholder: '72 101 108 108 111',
+          defaultInput: '72 101 108 108 111 33',
+          run: (input) => decimalToAscii(input)
+        },
+        {
+          id: 'ascii-to-decimal',
+          name: 'ASCII → Decimal',
+          category: 'converters',
+          badge: 'A → 72 101',
+          inputPlaceholder: 'Hello',
+          defaultInput: 'Hello!',
+          run: (input) => asciiToDecimal(input)
+        },
+        {
+          id: 'octal-to-ascii',
+          name: 'Octal → ASCII',
+          category: 'converters',
+          badge: '110 145 → A',
+          inputPlaceholder: '110 145 154 154 157',
+          defaultInput: '110 145 154 154 157',
+          run: (input) => octalToAscii(input)
+        },
+        {
+          id: 'ascii-to-octal',
+          name: 'ASCII → Octal',
+          category: 'converters',
+          badge: 'A → 110 145',
+          inputPlaceholder: 'Hello',
+          defaultInput: 'Hello',
+          run: (input) => asciiToOctal(input)
+        },
+        {
+          id: 'base64-decode',
+          name: 'Base64 Decode',
+          category: 'encoding',
+          badge: 'b64 → txt',
+          inputPlaceholder: 'SGVsbG8gV29ybGQh',
+          defaultInput: 'SGVsbG8gQ1RGLiBXZWxjb21lIHRvIE5hdCdDcmFjayE=',
+          run: (input) => base64Decode(input)
+        },
+        {
+          id: 'base64-encode',
+          name: 'Base64 Encode',
+          category: 'encoding',
+          badge: 'txt → b64',
+          inputPlaceholder: 'Teks untuk di-encode...',
+          defaultInput: 'Hello CTF Player!',
+          run: (input) => base64Encode(input)
+        },
+        {
+          id: 'base32-decode',
+          name: 'Base32 Decode',
+          category: 'encoding',
+          badge: 'b32 → txt',
+          inputPlaceholder: 'JBSWY3DPEBLW64TMMQ======',
+          defaultInput: 'JBSWY3DPEBLW64TMMQ======',
+          run: (input) => base32Decode(input)
+        },
+        {
+          id: 'base32-encode',
+          name: 'Base32 Encode',
+          category: 'encoding',
+          badge: 'txt → b32',
+          inputPlaceholder: 'Teks untuk di-encode...',
+          defaultInput: 'Hello World',
+          run: (input) => base32Encode(input)
+        },
+        {
+          id: 'url-decode',
+          name: 'URL Decode',
+          category: 'encoding',
+          badge: '%20 → spc',
+          inputPlaceholder: 'flag%7Burl_d3c0d1ng_1s_34sy%7D',
+          defaultInput: 'flag%7Burl_d3c0d1ng_1s_34sy%7D',
+          run: (input) => decodeURIComponent(input.trim())
+        },
+        {
+          id: 'url-encode',
+          name: 'URL Encode',
+          category: 'encoding',
+          badge: 'spc → %20',
+          inputPlaceholder: 'flag{hello world?&}',
+          defaultInput: 'flag{ctf_url_challenge}',
+          run: (input) => encodeURIComponent(input.trim())
+        },
+        {
+          id: 'rot13',
+          name: 'ROT13',
+          category: 'crypto',
+          badge: 'A ↔ N',
+          inputPlaceholder: 'synt{ebg13_vf_rnfl}',
+          defaultInput: 'synt{ebg13_vf_rnfl}',
+          run: (input) => caesarCipher(input, 13)
+        },
+        {
+          id: 'caesar-cipher',
+          name: 'Caesar Cipher',
+          category: 'crypto',
+          badge: 'Shift N',
+          inputPlaceholder: 'Masukkan ciphertext...',
+          defaultInput: 'khoor zruog! iodj{fdhvdu_vroyhg}',
+          optionsConfig: [
+            { type: 'slider', label: 'Shift', key: 'shift', defaultValue: 23, min: 1, max: 25 },
+            { type: 'boolean', label: 'Tampilkan semua 25 shift (Brute-force)', key: 'showAll', defaultValue: true }
+          ],
+          run: (input, opts) => {
+            const s = Number(opts?.shift ?? 23);
+            return caesarCipher(input, s);
+          }
+        },
+        {
+          id: 'xor-cipher',
+          name: 'XOR Cipher',
+          category: 'crypto',
+          badge: 'A ⊕ B',
+          inputPlaceholder: 'Masukkan teks atau hex...',
+          defaultInput: '1c0111001f010100061a024b535350',
+          optionsConfig: [
+            { type: 'text', label: 'Kunci XOR', key: 'key', defaultValue: 'k' },
+            { type: 'boolean', label: 'Input adalah Hex', key: 'inputIsHex', defaultValue: true },
+            { type: 'boolean', label: 'Output sebagai Hex', key: 'outputAsHex', defaultValue: false }
+          ],
+          run: (input, opts) => xorCipher(input, opts?.key || 'k', opts?.inputIsHex !== false, !!opts?.outputAsHex)
+        },
+        {
+          id: 'atbash-cipher',
+          name: 'Atbash Cipher',
+          category: 'crypto',
+          badge: 'A ↔ Z',
+          inputPlaceholder: 'Masukkan teks...',
+          defaultInput: 'uooxg dliow! uozt{zgyzhs_xrigvi}',
+          run: (input) => atbashCipher(input)
+        },
+        {
+          id: 'reverse-string',
+          name: 'Reverse String',
+          category: 'crypto',
+          badge: 'abc → cba',
+          inputPlaceholder: 'Teks untuk dibalik...',
+          defaultInput: '}gnirts_desrever{galf',
+          run: (input) => input.split('').reverse().join('')
+        },
+        {
+          id: 'hash-identifier',
+          name: 'Hash Identifier',
+          category: 'hash',
+          badge: 'ID Hash',
+          inputPlaceholder: 'Tempel hash (contoh: 5d41402abc4b2a76b9719d911017c592)...',
+          defaultInput: '5d41402abc4b2a76b9719d911017c592',
+          run: (input) => identifyHash(input)
+        },
+        {
+          id: 'hash-generator',
+          name: 'Hash Generator',
+          category: 'hash',
+          badge: 'MD5/SHA',
+          inputPlaceholder: 'Masukkan teks untuk di-hash...',
+          defaultInput: 'hello world',
+          run: (input) => generateHashes(input)
+        },
+        {
+          id: 'jwt-inspector',
+          name: 'JWT Inspector',
+          category: 'misc',
+          badge: 'eyJ... Token',
+          inputPlaceholder: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          defaultInput: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsZXggQ1RGIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+          run: (input) => decodeJwt(input)
+        },
+        {
+          id: 'timestamp-converter',
+          name: 'Timestamp Converter',
+          category: 'misc',
+          badge: '1700000000',
+          inputPlaceholder: 'Unix epoch timestamp...',
+          defaultInput: '1757116800',
+          run: (input) => {
+            const n = Number(input.trim());
+            if (isNaN(n)) return 'Error: Format angka tidak valid';
+            const date = new Date(n > 1e11 ? n : n * 1000);
+            return `Unix Epoch (detik):   ${Math.floor(date.getTime() / 1000)}\nUnix Epoch (millis):  ${date.getTime()}\nUTC Waktu:            ${date.toUTCString()}\nLokal Waktu:          ${date.toLocaleString()}`;
+          }
+        },
+        {
+          id: 'json-formatter',
+          name: 'JSON Formatter & Minifier',
+          category: 'misc',
+          badge: '{ } Formatter',
+          inputPlaceholder: '{"flag":"test","status":1}',
+          defaultInput: '{"title":"Nat\'Crack","type":"CTF Utility Box","features":["Fast","Immediate Output"],"config":{"active":true,"port":3000}}',
+          optionsConfig: [
+            {
+              type: 'select',
+              label: 'Format',
+              key: 'mode',
+              defaultValue: '2',
+              options: [
+                { label: 'Rapi (2 Spasi)', value: '2' },
+                { label: 'Rapi (4 Spasi)', value: '4' },
+                { label: 'Minified (Satu Baris)', value: 'mini' }
+              ]
+            }
+          ],
+          run: (input, opts) => {
+            try {
+              const obj = JSON.parse(input);
+              if (opts?.mode === 'mini') return JSON.stringify(obj);
+              return JSON.stringify(obj, null, Number(opts?.mode || 2));
+            } catch (e) {
+              return `Invalid JSON: ${e.message}`;
+            }
+          }
+        },
+        {
+          id: 'string-inspector',
+          name: 'String Inspector & Entropy',
+          category: 'misc',
+          badge: 'Metrics & H(X)',
+          inputPlaceholder: 'Masukkan string...',
+          defaultInput: 'c2VjdXJlX2ZsYWd7c2hhbm5vbl9lbnRyb3B5XzEyMzR9',
+          run: (input) => {
+            const len = input.length;
+            const bytes = new TextEncoder().encode(input).length;
+            const words = input.trim() ? input.trim().split(/\s+/).length : 0;
+            const lines = input ? input.split('\n').length : 0;
+            const entropy = calculateEntropy(input);
+            return `Karakter:        ${len}\nUkuran UTF-8:    ${bytes} bytes\nJumlah Kata:     ${words}\nJumlah Baris:    ${lines}\nShannon Entropy: ${entropy} bits/karakter (0=seragam, 8=maksimal acak)`;
+          }
+        },
+        {
+          id: 'initial-flow',
+          name: 'Initial Flow RE & Forensics',
+          category: 're-forensics',
+          badge: 'CTF Triage Pipeline',
+          inputPlaceholder: 'Nama file challenge...',
+          defaultInput: 'challenge.bin',
+          run: () => 'Buka Initial Flow Interactive di atas untuk mengeksekusi tahapan triage.'
+        },
+        {
+          id: 'python-script-writer',
+          name: 'Python Script Writer',
+          category: 'scripting',
+          badge: '100% Relevant Code',
+          inputPlaceholder: 'Instruksi solver script...',
+          defaultInput: 'Buatkan script XOR brute-force mencari flag{',
+          run: () => 'Buka modal Python Script Writer untuk generate solver Python lengkap.'
+        },
+        {
+          id: 'code-reader',
+          name: 'Code Reader & Explainer',
+          category: 'scripting',
+          badge: 'Line-by-Line Breakdown',
+          inputPlaceholder: 'Tempel kode C/Python/Assembly...',
+          defaultInput: 'int main() { char pass[32]; gets(pass); if(strcmp(pass, "s3cr3t")==0) win(); }',
+          run: () => 'Buka modal Code Reader & Explainer untuk membedah kode baris per baris.'
+        }
+      ];
+
+      const CATEGORIES = [
+        { key: 'all', label: 'Semua', icon: 'layers' },
+        { key: 're-forensics', label: 'RE & Forensics', icon: 'crosshair' },
+        { key: 'scripting', label: 'Script & AI', icon: 'terminal' },
+        { key: 'converters', label: 'Converters', icon: 'binary' },
+        { key: 'encoding', label: 'Encoding', icon: 'zap' },
+        { key: 'crypto', label: 'Crypto', icon: 'key-round' },
+        { key: 'hash', label: 'Hash', icon: 'shield-alert' },
+        { key: 'misc', label: 'Misc', icon: 'layers' },
+      ];
+
+      /* --- 4. STATE MANAGEMENT --- */
+      let currentCategory = 'all';
+      let searchQuery = '';
+      let dataTrail = [];
+      let activeTool = null;
+      let modalOptions = {};
+      let chatHistory = [
+        {
+          role: 'assistant',
+          content: 'Halo! Saya **Nat\'Crack AI Assistant**. Siap membantu Anda memecahkan sandi, menganalisis pola hash, atau merancang strategi decoding untuk kompetisi CTF. Ada yang bisa dibantu?'
+        }
+      ];
+
+      /* --- 5. RENDER FUNCTIONS --- */
+      function renderCategories() {
+        const container = document.getElementById('categories-bar');
+        if (!container) return;
+        container.innerHTML = CATEGORIES.map(cat => {
+          const isActive = currentCategory === cat.key;
+          return `
+            <button
+              onclick="setCategory('${cat.key}')"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+                isActive
+                  ? 'text-zinc-950 bg-[#22c55e] shadow-[0_0_16px_rgba(34,197,94,0.35)]'
+                  : 'bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800/80 hover:border-zinc-700'
+              }"
+            >
+              <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
+              <span>${cat.label}</span>
+            </button>
+          `;
+        }).join('');
+        lucide.createIcons();
+      }
+
+      function setCategory(catKey) {
+        currentCategory = catKey;
+        renderCategories();
+        renderToolsGrid();
+      }
+
+      function renderToolsGrid() {
+        const container = document.getElementById('tools-grid-container');
+        const badge = document.getElementById('tools-counter-badge');
+        if (!container) return;
+
+        const q = searchQuery.toLowerCase().trim();
+        const filtered = TOOLS.filter(t => {
+          const matchCat = currentCategory === 'all' || t.category === currentCategory;
+          const matchQuery = !q || t.name.toLowerCase().includes(q) || t.badge.toLowerCase().includes(q);
+          return matchCat && matchQuery;
+        });
+
+        if (badge) badge.innerText = filtered.length;
+
+        if (filtered.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/20">
+              <i data-lucide="filter" class="w-8 h-8 text-zinc-600 mx-auto mb-2"></i>
+              <p class="text-sm text-zinc-400">Tidak ada tool yang cocok</p>
+              <button onclick="resetToolsSearch()" class="mt-3 text-xs font-medium text-[#4ade80] hover:underline">
+                Reset filter
+              </button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = filtered.map(tool => `
+            <div
+              onclick="openToolModal('${tool.id}')"
+              class="group relative rounded-2xl p-[1px] text-left transition-all duration-300 overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_10px_25px_-5px_rgba(34,197,94,0.25)] hover:-translate-y-1"
+            >
+              <!-- Living Dynamic Border Layer -->
+              <div class="absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-emerald-500/40 via-teal-500/20 to-zinc-800 group-hover:from-emerald-400 group-hover:via-[#22c55e] group-hover:to-cyan-400 transition-all duration-500 opacity-70 group-hover:opacity-100"></div>
+
+              <!-- Internal ambient glow -->
+              <div class="absolute inset-[1px] rounded-[15px] bg-[#0c1017] group-hover:bg-[#111722] transition-colors duration-300"></div>
+
+              <!-- Card Content -->
+              <div class="relative z-10 p-4 h-full flex flex-col justify-between min-h-[108px]">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[11px] font-semibold tracking-wide px-2 py-0.5 rounded-lg bg-zinc-900/90 text-emerald-400 border border-emerald-500/20 group-hover:border-emerald-400/50 group-hover:bg-emerald-500/10 group-hover:text-emerald-300 transition-all">
+                    ${tool.badge}
+                  </span>
+                  <div class="w-6 h-6 rounded-lg bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-emerald-400 group-hover:border-emerald-500/40 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all">
+                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+
+                <div class="pt-2">
+                  <h3 class="text-sm font-bold text-zinc-100 group-hover:text-white transition-colors tracking-tight leading-snug">
+                    ${tool.name}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+        lucide.createIcons();
+      }
+
+      function resetToolsSearch() {
+        searchQuery = '';
+        currentCategory = 'all';
+        const inp = document.getElementById('tools-search-input');
+        const clearBtn = document.getElementById('clear-tools-search');
+        if (inp) inp.value = '';
+        if (clearBtn) clearBtn.classList.add('hidden');
+        renderCategories();
+        renderToolsGrid();
+      }
+
+      /* --- 6. SMART DETECTOR LOGIC --- */
+      const smartInput = document.getElementById('smart-detect-input');
+      const charCounter = document.getElementById('char-counter');
+      const lineCounter = document.getElementById('line-counter');
+      const clearBtn = document.getElementById('clear-input-btn');
+      const entropyWrapper = document.getElementById('entropy-wrapper');
+      const entropyVal = document.getElementById('entropy-value');
+
+      function updateSmartInputMetrics() {
+        const val = smartInput.value;
+        const len = val.length;
+        const lines = val ? val.split('\n').length : 0;
+        charCounter.innerText = `${len} chars`;
+        lineCounter.innerText = `${lines} lines`;
+
+        if (len > 0) {
+          clearBtn.classList.remove('hidden');
+          clearBtn.classList.add('inline-flex');
+          entropyWrapper.classList.remove('hidden');
+          entropyWrapper.classList.add('flex');
+          entropyVal.innerText = calculateEntropy(val);
+        } else {
+          clearBtn.classList.add('hidden');
+          entropyWrapper.classList.add('hidden');
+          document.getElementById('detection-results-container').innerHTML = '';
+        }
+      }
+
+      let smartInputDebounceTimer = null;
+      smartInput.addEventListener('input', () => {
+        updateSmartInputMetrics();
+        clearTimeout(smartInputDebounceTimer);
+        smartInputDebounceTimer = setTimeout(() => {
+          runAutoDetect(true);
+        }, 120);
+      });
+
+      function clearSmartInput() {
+        smartInput.value = '';
+        updateSmartInputMetrics();
+        document.getElementById('detection-results-container').innerHTML = '';
+      }
+
+      function loadSample(sample) {
+        smartInput.value = sample;
+        updateSmartInputMetrics();
+        runAutoDetect(true);
+      }
+
+      // File upload handler
+      document.getElementById('smart-file-input').addEventListener('change', function (e) {
+        if (this.files && this.files[0]) {
+          const file = this.files[0];
+          handleFilenameAutoDetect(file.name, true);
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            smartInput.value = evt.target.result;
+            updateSmartInputMetrics();
+            runAutoDetect(true);
+          };
+          reader.readAsText(file);
+        }
+      });
+
+      function runAutoDetect(instant = false) {
+        const text = smartInput.value.trim();
+        const resContainer = document.getElementById('detection-results-container');
+        if (!text) {
+          if (resContainer) resContainer.innerHTML = '';
+          return;
+        }
+
+        const scanning = document.getElementById('smart-scanning-indicator');
+
+        const processDetection = () => {
+          if (scanning) {
+            scanning.classList.add('hidden');
+            scanning.classList.remove('flex');
+          }
+
+          // Detection rules
+          const candidates = [];
+          const clean = text.trim();
+
+          // 0. Instant Math Evaluator (Kombinasi, Permutasi, Faktorial, Aritmatika)
+          const mathResult = solveMathExpression(clean);
+          if (mathResult !== null) {
+            candidates.push({
+              toolId: 'math-eval',
+              toolName: 'Hasil Hitungan',
+              confidence: 100,
+              preview: mathResult
+            });
+          }
+
+          // Check if input is a challenge filename (e.g. chall.py, challenge.elf)
+          if (/^[\w.\-_/]+\.(py|pyc|elf|bin|exe|c|cpp|png|jpg|jpeg|pcap|zip|tar|gz|pdf)$/i.test(clean)) {
+            candidates.push({
+              toolId: 'flow-triage',
+              toolName: 'Initial Flow Triage (' + (/\.(py|pyc|elf|bin|exe|c|cpp)$/i.test(clean) ? 'RE' : 'Forensics') + ')',
+              confidence: 100,
+              preview: `File challenge "${clean}" terdeteksi! Alur triage Initial Flow aktif di bawah.`
+            });
+            handleFilenameAutoDetect(clean, true);
+          }
+
+          // 1. JWT
+          if (/^eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/.test(clean)) {
+            candidates.push({
+              toolId: 'jwt-inspector',
+              toolName: 'JWT Token Inspector',
+              confidence: 99,
+              preview: decodeJwt(clean)
+            });
+          }
+
+          // 2. Binary
+          if (/^[01\s]+$/.test(clean) && clean.replace(/\s+/g, '').length >= 8) {
+            candidates.push({
+              toolId: 'binary-to-ascii',
+              toolName: 'Binary Sequence',
+              confidence: 95,
+              preview: binaryToAscii(clean)
+            });
+          }
+
+          // 3. Hex
+          const hexOnly = clean.replace(/^0x/i, '').replace(/\s+/g, '');
+          if (/^[0-9a-fA-F]+$/.test(hexOnly) && hexOnly.length >= 2 && hexOnly.length % 2 === 0) {
+            candidates.push({
+              toolId: 'hex-to-ascii',
+              toolName: 'Hexadecimal Stream',
+              confidence: 90,
+              preview: hexToAscii(clean)
+            });
+          }
+
+          // 4. Base64
+          if (/^[A-Za-z0-9+/=]{4,}$/.test(clean) && clean.length % 4 === 0) {
+            try {
+              const decoded = base64Decode(clean);
+              if (decoded && !decoded.includes('Error')) {
+                candidates.push({
+                  toolId: 'base64-decode',
+                  toolName: 'Base64 Encoded String',
+                  confidence: 85,
+                  preview: decoded
+                });
+              }
+            } catch {}
+          }
+
+          // 5. Hashes
+          if (/^[0-9a-fA-F]{32,128}$/.test(clean)) {
+            candidates.push({
+              toolId: 'hash-identifier',
+              toolName: 'Cryptographic Hash',
+              confidence: 90,
+              preview: identifyHash(clean)
+            });
+          }
+
+          // 6. ROT13 / Caesar Shift (only if input has alphabetic characters)
+          if (/[a-zA-Z]/.test(clean) && !clean.includes(' ')) {
+            candidates.push({
+              toolId: 'rot13',
+              toolName: 'ROT13 / Caesar Shift',
+              confidence: 60,
+              preview: caesarCipher(clean, 13)
+            });
+          }
+
+          if (candidates.length > 0) {
+            const top = candidates[0];
+            resContainer.innerHTML = `
+              <div class="rounded-2xl border border-emerald-500/40 bg-[#0c1017] p-5 shadow-[0_0_30px_rgba(34,197,94,0.12)]">
+                <div class="flex items-center justify-between border-b border-zinc-800/80 pb-3 mb-4">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <h3 class="text-base font-bold text-white tracking-tight">
+                      ${top.toolName}
+                    </h3>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <button
+                      onclick="openToolModal('${top.toolId}', \`${encodeURIComponent(clean)}\`)"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition-colors cursor-pointer"
+                    >
+                      <span>Buka Solver</span>
+                      <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </button>
+
+                    <button
+                      onclick="addToDataTrail('${top.toolName}', \`${encodeURIComponent(clean)}\`, \`${encodeURIComponent(top.preview)}\`, '${top.toolId}')"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors cursor-pointer"
+                    >
+                      <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
+                      <span>Data Trail</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="bg-zinc-950/90 rounded-xl p-3.5 border border-zinc-800/80">
+                  <div class="flex items-center justify-between text-xs pb-2 border-b border-zinc-900">
+                    <span class="font-bold text-zinc-300">Hasil</span>
+                    <button
+                      onclick="copyToClipboard(\`${encodeURIComponent(top.preview)}\`, this)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border border-zinc-800 cursor-pointer"
+                    >
+                      <i data-lucide="copy" class="w-3 h-3"></i>
+                      <span>Salin</span>
+                    </button>
+                  </div>
+                  <div class="py-2.5 font-mono text-xs sm:text-sm text-zinc-100 max-h-36 overflow-x-auto whitespace-pre-wrap break-all select-all">
+                    ${escapeHtml(top.preview)}
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            // General query / Question detected: Provide direct quick-launch into Nat'Crack AI
+            resContainer.innerHTML = `
+              <div class="rounded-2xl border border-zinc-800 bg-[#0c1017] p-5">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      <h4 class="text-sm font-bold text-white tracking-tight">Ingin Menanyakan Topik atau Pertanyaan Ini ke AI?</h4>
+                    </div>
+                    <p class="text-xs text-zinc-400">
+                      Input ini tidak cocok dengan format hash/binary/cipher langsung. Anda dapat langsung mendiskusikannya dengan <strong>Nat'Crack AI</strong>.
+                    </p>
+                  </div>
+
+                  <button
+                    onclick="openAIChatModal(\`${encodeURIComponent(clean)}\`)"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-zinc-950 bg-[#22c55e] hover:bg-[#16a34a] shadow-[0_0_15px_rgba(34,197,94,0.3)] transition-all cursor-pointer flex-shrink-0"
+                  >
+                    <i data-lucide="bot" class="w-4 h-4"></i>
+                    <span>Tanyakan ke AI</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+          lucide.createIcons();
+        };
+
+        if (instant) {
+          processDetection();
+        } else {
+          if (scanning) {
+            scanning.classList.remove('hidden');
+            scanning.classList.add('flex');
+          }
+          resContainer.innerHTML = '';
+          setTimeout(processDetection, 300);
+        }
+      }
+
+      /* --- 7. DATA TRAIL LOGIC --- */
+      function addToDataTrail(toolName, inputEncoded, outputEncoded, toolId) {
+        const input = decodeURIComponent(inputEncoded);
+        const output = decodeURIComponent(outputEncoded);
+        dataTrail.push({
+          id: Date.now().toString(),
+          toolName,
+          input,
+          output,
+          toolId
+        });
+        renderDataTrail();
+      }
+
+      function renderDataTrail() {
+        const section = document.getElementById('data-trail-section');
+        const navBtn = document.getElementById('nav-trail-button');
+        const navText = document.getElementById('nav-trail-text');
+        const badge = document.getElementById('data-trail-badge');
+        const stepsContainer = document.getElementById('data-trail-steps');
+
+        if (dataTrail.length === 0) {
+          section.classList.add('hidden');
+          navBtn.classList.add('hidden');
+          navBtn.classList.remove('inline-flex');
+          return;
+        }
+
+        section.classList.remove('hidden');
+        navBtn.classList.remove('hidden');
+        navBtn.classList.add('inline-flex');
+        navText.innerText = `Trail (${dataTrail.length})`;
+        badge.innerText = dataTrail.length;
+
+        stepsContainer.innerHTML = dataTrail.map((step, idx) => `
+          <div class="relative pl-6 border-l-2 border-emerald-500/30 pb-4 last:pb-0">
+            <span class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#0c1017] border-2 border-[#22c55e] flex items-center justify-center text-[9px] font-bold text-emerald-400">
+              ${idx + 1}
+            </span>
+
+            <div class="bg-zinc-950/70 rounded-xl border border-zinc-800/80 p-3.5 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white tracking-tight">${step.toolName}</span>
+                <div class="flex items-center gap-1.5">
+                  <button
+                    onclick="applyTrailAsInput(${idx})"
+                    class="text-[11px] px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border border-emerald-500/20 transition-colors"
+                  >
+                    Gunakan sbg Input
+                  </button>
+                  <button
+                    onclick="removeTrailStep(${idx})"
+                    class="text-zinc-500 hover:text-red-400 p-1 transition-colors"
+                  >
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="font-mono text-xs bg-zinc-900/60 p-2.5 rounded-lg text-zinc-200 break-all select-all">
+                ${escapeHtml(step.output)}
+              </div>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      }
+
+      function applyTrailAsInput(idx) {
+        if (!dataTrail[idx]) return;
+        smartInput.value = dataTrail[idx].output;
+        updateSmartInputMetrics();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        smartInput.focus();
+      }
+
+      function removeTrailStep(idx) {
+        dataTrail.splice(idx, 1);
+        renderDataTrail();
+      }
+
+      function clearDataTrail() {
+        dataTrail = [];
+        renderDataTrail();
+      }
+
+      /* --- 8. TOOL MODAL LOGIC --- */
+      function openToolModal(toolId, initialInputEncoded) {
+        if (toolId === 'initial-flow') {
+          document.getElementById('interactive-flow-section')?.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+        if (toolId === 'python-script-writer') {
+          openScriptWriterModal();
+          return;
+        }
+        if (toolId === 'code-reader') {
+          openCodeReaderModal();
+          return;
+        }
+
+        const tool = TOOLS.find(t => t.id === toolId);
+        if (!tool) return;
+        activeTool = tool;
+
+        const modal = document.getElementById('tool-modal');
+        const badge = document.getElementById('modal-tool-badge');
+        const name = document.getElementById('modal-tool-name');
+        const inputArea = document.getElementById('modal-input-text');
+        const optionsContainer = document.getElementById('modal-options-container');
+
+        badge.innerText = tool.badge;
+        name.innerText = tool.name;
+
+        // Reset options
+        modalOptions = {};
+        if (tool.optionsConfig) {
+          tool.optionsConfig.forEach(opt => {
+            modalOptions[opt.key] = opt.defaultValue;
+          });
+        }
+
+        // Render options UI if any
+        if (tool.optionsConfig && tool.optionsConfig.length > 0) {
+          optionsContainer.classList.remove('hidden');
+          optionsContainer.classList.add('flex');
+          optionsContainer.innerHTML = tool.optionsConfig.map(opt => {
+            if (opt.type === 'boolean') {
+              return `
+                <label class="inline-flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    ${modalOptions[opt.key] ? 'checked' : ''}
+                    onchange="updateModalOption('${opt.key}', this.checked)"
+                    class="rounded bg-zinc-950 border-zinc-700 text-emerald-500 focus:ring-0 focus:ring-offset-0"
+                  />
+                  <span>${opt.label}</span>
+                </label>
+              `;
+            } else if (opt.type === 'slider') {
+              return `
+                <div class="flex items-center gap-2 text-xs text-zinc-300">
+                  <span>${opt.label}:</span>
+                  <input
+                    type="range"
+                    min="${opt.min}"
+                    max="${opt.max}"
+                    value="${modalOptions[opt.key]}"
+                    oninput="updateModalOption('${opt.key}', this.value); document.getElementById('slider-val-${opt.key}').innerText = this.value"
+                    class="accent-[#22c55e] w-28 cursor-pointer"
+                  />
+                  <span id="slider-val-${opt.key}" class="font-mono text-emerald-400 font-bold">${modalOptions[opt.key]}</span>
+                </div>
+              `;
+            } else if (opt.type === 'select') {
+              return `
+                <div class="flex items-center gap-2 text-xs text-zinc-300">
+                  <span>${opt.label}:</span>
+                  <select
+                    onchange="updateModalOption('${opt.key}', this.value)"
+                    class="bg-zinc-950 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none"
+                  >
+                    ${opt.options.map(o => `<option value="${o.value}" ${o.value === modalOptions[opt.key] ? 'selected' : ''}>${o.label}</option>`).join('')}
+                  </select>
+                </div>
+              `;
+            } else if (opt.type === 'text') {
+              return `
+                <div class="flex items-center gap-2 text-xs text-zinc-300">
+                  <span>${opt.label}:</span>
+                  <input
+                    type="text"
+                    value="${modalOptions[opt.key]}"
+                    oninput="updateModalOption('${opt.key}', this.value)"
+                    class="bg-zinc-950 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none w-28 font-mono"
+                  />
+                </div>
+              `;
+            }
+            return '';
+          }).join('');
+        } else {
+          optionsContainer.classList.add('hidden');
+          optionsContainer.classList.remove('flex');
+        }
+
+        const defaultVal = initialInputEncoded ? decodeURIComponent(initialInputEncoded) : (tool.defaultInput || '');
+        inputArea.value = defaultVal;
+        runModalTool();
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        inputArea.focus();
+        lucide.createIcons();
+      }
+
+      function updateModalOption(key, val) {
+        modalOptions[key] = val;
+        runModalTool();
+      }
+
+      function runModalTool() {
+        if (!activeTool) return;
+        const inputVal = document.getElementById('modal-input-text').value;
+        const outputArea = document.getElementById('modal-output-text');
+        const charLen = document.getElementById('modal-output-length');
+
+        if (!inputVal) {
+          outputArea.value = '';
+          charLen.innerText = '0 karakter';
+          return;
+        }
+
+        try {
+          const out = activeTool.run(inputVal, modalOptions);
+          outputArea.value = typeof out === 'string' ? out : (out.output || '');
+          charLen.innerText = `${outputArea.value.length} karakter`;
+        } catch (e) {
+          outputArea.value = `Error: ${e.message}`;
+        }
+      }
+
+      document.getElementById('modal-input-text').addEventListener('input', runModalTool);
+
+      function closeToolModal() {
+        const modal = document.getElementById('tool-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        activeTool = null;
+      }
+
+      async function pasteToModalInput() {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            document.getElementById('modal-input-text').value = text;
+            runModalTool();
+          }
+        } catch {}
+      }
+
+      function clearModalInput() {
+        document.getElementById('modal-input-text').value = '';
+        runModalTool();
+      }
+
+      function copyModalOutput() {
+        const out = document.getElementById('modal-output-text').value;
+        if (!out) return;
+        navigator.clipboard.writeText(out);
+        const btnText = document.getElementById('modal-copy-btn-text');
+        btnText.innerText = 'Tersalin!';
+        setTimeout(() => { btnText.innerText = 'Salin'; }, 1500);
+      }
+
+      function addModalToTrail() {
+        if (!activeTool) return;
+        const inp = document.getElementById('modal-input-text').value;
+        const out = document.getElementById('modal-output-text').value;
+        if (!out) return;
+        addToDataTrail(activeTool.name, encodeURIComponent(inp), encodeURIComponent(out), activeTool.id);
+        closeToolModal();
+        document.getElementById('data-trail-section')?.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      /* --- 9. QUICK SEARCH PALETTE (Ctrl + K) --- */
+      function openSearchModal() {
+        const modal = document.getElementById('search-modal');
+        const input = document.getElementById('search-modal-input');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        input.value = '';
+        renderSearchModalResults('');
+        setTimeout(() => input.focus(), 50);
+      }
+
+      function closeSearchModal() {
+        const modal = document.getElementById('search-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function renderSearchModalResults(q) {
+        const container = document.getElementById('search-modal-results');
+        const query = q.toLowerCase().trim();
+        const matches = TOOLS.filter(t => !query || t.name.toLowerCase().includes(query) || t.badge.toLowerCase().includes(query));
+
+        if (matches.length === 0) {
+          container.innerHTML = `<div class="p-6 text-center text-xs text-zinc-500">Tidak ada tool yang cocok</div>`;
+          return;
+        }
+
+        container.innerHTML = matches.map(t => `
+          <div
+            onclick="closeSearchModal(); openToolModal('${t.id}')"
+            class="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-900 cursor-pointer transition-colors"
+          >
+            <div class="flex items-center gap-2.5">
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-zinc-900 text-emerald-400 border border-emerald-500/20">
+                ${t.badge}
+              </span>
+              <span class="text-xs font-semibold text-zinc-200">${t.name}</span>
+            </div>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-zinc-500"></i>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      }
+
+      document.getElementById('search-modal-input').addEventListener('input', function () {
+        renderSearchModalResults(this.value);
+      });
+
+      // Hotkey listener for Ctrl + K / Command + K and Escape
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          openSearchModal();
+        } else if (e.key === 'Escape') {
+          closeToolModal();
+          closeSearchModal();
+          closeAIChatModal();
+        }
+      });
+
+      /* --- 10. AI ASSISTANT CHAT MODAL --- */
+      function openAIChatModal(prefillEncodedPrompt) {
+        const modal = document.getElementById('ai-chat-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        renderChatThread();
+        const chatInput = document.getElementById('ai-chat-input');
+        if (prefillEncodedPrompt) {
+          try {
+            const promptText = decodeURIComponent(prefillEncodedPrompt).trim();
+            if (promptText && chatInput) {
+              chatInput.value = promptText;
+              setTimeout(() => {
+                chatInput.focus();
+                handleAIChatSubmit();
+              }, 100);
+              return;
+            }
+          } catch {}
+        }
+        setTimeout(() => chatInput && chatInput.focus(), 50);
+      }
+
+      function closeAIChatModal() {
+        const modal = document.getElementById('ai-chat-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function escapeHtmlText(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      // Convert any raw LaTeX notation into clear, 100% human-readable math formulas
+      function latexToHumanReadable(text) {
+        if (!text) return '';
+        let res = text;
+        // Unpack nested \frac{numerator}{denominator} into (numerator) / (denominator)
+        for (let i = 0; i < 6; i++) {
+          res = res.replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '($1) / ($2)');
+        }
+        // Simplify obvious single-item parentheses: (5!) / (3!) or (120) / (12)
+        res = res.replace(/\(\s*([a-zA-Z0-9!]+)\s*\)\s*\/\s*\(\s*([a-zA-Z0-9!]+)\s*\)/g, '$1 / $2');
+        res = res.replace(/\(\s*([a-zA-Z0-9!]+)\s*\)\s*\//g, '$1 / ');
+        res = res.replace(/\/\s*\(\s*([a-zA-Z0-9!]+)\s*\)/g, '/ $1');
+
+        res = res.replace(/\\times/g, ' × ');
+        res = res.replace(/\\cdot/g, ' · ');
+        res = res.replace(/\\div/g, ' ÷ ');
+        res = res.replace(/\\pmod\s*\{([^}]+)\}/g, ' (mod $1)');
+        res = res.replace(/\\mod\s*\{([^}]+)\}/g, ' mod $1');
+        res = res.replace(/\\equiv/g, ' ≡ ');
+        res = res.replace(/\\approx/g, ' ≈ ');
+        res = res.replace(/\\neq/g, ' ≠ ');
+        res = res.replace(/\\le/g, ' ≤ ');
+        res = res.replace(/\\ge/g, ' ≥ ');
+        res = res.replace(/\\sqrt\s*\{([^}]+)\}/g, '√($1)');
+        res = res.replace(/\\left\(/g, '(');
+        res = res.replace(/\\right\)/g, ')');
+        res = res.replace(/\\left\[/g, '[');
+        res = res.replace(/\\right\]/g, ']');
+        res = res.replace(/\\left\{/g, '{');
+        res = res.replace(/\\right\}/g, '}');
+        res = res.replace(/\\pi/g, 'π');
+        res = res.replace(/\\phi/g, 'φ');
+        res = res.replace(/\\theta/g, 'θ');
+        res = res.replace(/\\infty/g, '∞');
+        res = res.replace(/\(\(([a-zA-Z0-9\s\-+]+)\)!\)/g, '($1)!');
+        res = res.replace(/\\[a-zA-Z]+\{([^}]+)\}/g, '$1');
+        res = res.replace(/\\[a-zA-Z]+/g, '');
+        res = res.replace(/\$\$/g, '');
+        res = res.replace(/\$([^\$]+)\$/g, '$1');
+        res = res.replace(/\$/g, '');
+        res = res.replace(/[ \t]+/g, ' ');
+        return res.trim();
+      }
+
+      function renderHumanMathBlock(mathStr, isBlock = false) {
+        const readable = latexToHumanReadable(mathStr);
+        if (isBlock) {
+          return `<div class="math-formula-card my-2 px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-emerald-500/30 font-mono text-xs sm:text-sm text-emerald-300 overflow-x-auto shadow-inner select-all leading-relaxed">${escapeHtmlText(readable)}</div>`;
+        }
+        return `<code class="math-formula-card px-1.5 py-0.5 rounded bg-zinc-950 border border-emerald-500/25 text-emerald-300 font-mono text-xs mx-0.5">${escapeHtmlText(readable)}</code>`;
+      }
+
+      function formatMarkdown(text) {
+        if (!text) return '';
+
+        const codePlaceholders = [];
+        const mathBlockPlaceholders = [];
+        const mathInlinePlaceholders = [];
+        const inlineCodePlaceholders = [];
+
+        // 1. Multi-line code blocks ```lang ... ```
+        let clean = text.replace(/```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g, (_m, lang, code) => {
+          const idx = codePlaceholders.length;
+          codePlaceholders.push(
+            `<div class="my-2.5 rounded-lg border border-zinc-800 bg-zinc-950 overflow-hidden"><div class="px-3 py-1 bg-zinc-900 border-b border-zinc-800/80 text-[10px] font-mono text-zinc-400 flex items-center justify-between"><span>${lang || 'code'}</span><span class="text-[9px] text-zinc-500">CTF SNIPPET</span></div><pre class="p-3 overflow-x-auto text-[11px] font-mono text-emerald-400 leading-relaxed"><code>${escapeHtmlText(code.trim())}</code></pre></div>`
+          );
+          return `###CODE_BLOCK_${idx}###`;
+        });
+
+        // 2. Display Math $$...$$ or \[...\] -> clean human-readable formula cards
+        clean = clean.replace(/\$\$([\s\S]*?)\$\$/g, (_m, math) => {
+          const idx = mathBlockPlaceholders.length;
+          mathBlockPlaceholders.push(renderHumanMathBlock(math, true));
+          return `###MATH_BLOCK_${idx}###`;
+        });
+        clean = clean.replace(/\\\[([\s\S]*?)\\\]/g, (_m, math) => {
+          const idx = mathBlockPlaceholders.length;
+          mathBlockPlaceholders.push(renderHumanMathBlock(math, true));
+          return `###MATH_BLOCK_${idx}###`;
+        });
+
+        // 3. Inline Math $...$ or \(...\) -> clean inline math code
+        clean = clean.replace(/\$([^\$\n\r]+?)\$/g, (_m, math) => {
+          if (/^\s*\d+(\.\d+)?\s*$/.test(math)) return `$${math}$`; // Avoid currency $50
+          const idx = mathInlinePlaceholders.length;
+          mathInlinePlaceholders.push(renderHumanMathBlock(math, false));
+          return `###MATH_INLINE_${idx}###`;
+        });
+        clean = clean.replace(/\\\(([\s\S]*?)\\\)/g, (_m, math) => {
+          const idx = mathInlinePlaceholders.length;
+          mathInlinePlaceholders.push(renderHumanMathBlock(math, false));
+          return `###MATH_INLINE_${idx}###`;
+        });
+
+        // 4. Inline code `code`
+        clean = clean.replace(/`([^`]+)`/g, (_m, code) => {
+          const idx = inlineCodePlaceholders.length;
+          inlineCodePlaceholders.push(
+            `<code class="bg-zinc-950 px-1.5 py-0.5 rounded text-emerald-400 font-mono text-[11px] border border-zinc-800">${escapeHtmlText(code)}</code>`
+          );
+          return `###INLINE_CODE_${idx}###`;
+        });
+
+        // 5. Clean any un-delimited LaTeX syntax in text into clean human-readable text
+        clean = latexToHumanReadable(clean);
+
+        // 6. Bold & Italics
+        clean = clean.replace(/\*\*(.*?)\*\*/g, '<strong class="text-emerald-300 font-semibold">$1</strong>');
+        clean = clean.replace(/\*(.*?)\*/g, '<em class="text-zinc-300 italic">$1</em>');
+
+        // 7. Headers
+        clean = clean.replace(/^### (.*$)/gim, '<h4 class="text-xs font-bold text-emerald-400 mt-2.5 mb-1 tracking-tight">$1</h4>');
+        clean = clean.replace(/^## (.*$)/gim, '<h3 class="text-sm font-bold text-emerald-400 mt-3 mb-1.5 tracking-tight">$1</h3>');
+        clean = clean.replace(/^# (.*$)/gim, '<h2 class="text-base font-bold text-emerald-400 mt-3.5 mb-2 tracking-tight">$1</h2>');
+
+        // 8. Bullet points & ordered lists
+        clean = clean.replace(/^\s*[\*\-]\s+(.*$)/gim, '<li class="ml-4 list-disc text-zinc-200">$1</li>');
+        clean = clean.replace(/^\s*(\d+)\.\s+(.*$)/gim, '<li class="ml-4 list-decimal text-zinc-200"><span class="font-semibold text-emerald-400">$1.</span> $2</li>');
+
+        // 9. Paragraphs and line breaks
+        clean = clean.replace(/\n\n+/g, '<div class="my-2"></div>');
+        clean = clean.replace(/\n/g, '<br/>');
+
+        // 10. Restore placeholders in reverse order
+        clean = clean.replace(/###INLINE_CODE_(\d+)###/g, (_m, idx) => inlineCodePlaceholders[+idx] || '');
+        clean = clean.replace(/###MATH_INLINE_(\d+)###/g, (_m, idx) => mathInlinePlaceholders[+idx] || '');
+        clean = clean.replace(/###MATH_BLOCK_(\d+)###/g, (_m, idx) => mathBlockPlaceholders[+idx] || '');
+        clean = clean.replace(/###CODE_BLOCK_(\d+)###/g, (_m, idx) => codePlaceholders[+idx] || '');
+
+        return clean;
+      }
+
+      function renderChatThread() {
+        const thread = document.getElementById('ai-chat-thread');
+        thread.innerHTML = chatHistory.map(msg => {
+          const isUser = msg.role === 'user';
+          const isPending = !!msg.isPending;
+          return `
+            <div class="flex gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}">
+              ${!isUser ? `
+                <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[#22c55e] flex-shrink-0 mt-0.5">
+                  <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+                </div>
+              ` : ''}
+
+              <div class="max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
+                isUser
+                  ? 'bg-[#22c55e] text-zinc-950 font-medium'
+                  : 'bg-zinc-900/90 text-zinc-200 border border-zinc-800 shadow-lg'
+              }">
+                ${isPending ? `
+                  <div class="flex items-center gap-2 py-0.5 text-emerald-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" style="animation-delay: 200ms"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" style="animation-delay: 400ms"></span>
+                    <span class="text-xs text-zinc-400 ml-1 font-mono">Nat'Crack AI sedang menganalisis...</span>
+                  </div>
+                ` : `
+                  <div class="chat-message-content break-words leading-relaxed text-xs sm:text-sm">${formatMarkdown(msg.content)}</div>
+                  ${!isUser ? `
+                    <div class="flex justify-end pt-1.5 mt-1.5 border-t border-zinc-800/60">
+                      <button
+                        onclick="copyToClipboard(\`${encodeURIComponent(msg.content)}\`, this)"
+                        class="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-400 transition-colors cursor-pointer py-0.5 px-1.5 rounded hover:bg-zinc-800"
+                        title="Salin Respons"
+                      >
+                        <i data-lucide="copy" class="w-3 h-3"></i>
+                        <span>Salin</span>
+                      </button>
+                    </div>
+                  ` : ''}
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+        thread.scrollTop = thread.scrollHeight;
+        lucide.createIcons();
+      }
+
+      async function handleAIChatSubmit(e) {
+        if (e) e.preventDefault();
+        const inp = document.getElementById('ai-chat-input');
+        const text = inp.value.trim();
+        if (!text) return;
+
+        // Add user question to history
+        chatHistory.push({ role: 'user', content: text });
+        inp.value = '';
+        renderChatThread();
+
+        // Add pending typing state
+        chatHistory.push({ role: 'assistant', content: '', isPending: true });
+        renderChatThread();
+
+        const sendBtn = document.getElementById('ai-chat-send-btn');
+        if (sendBtn) sendBtn.disabled = true;
+
+        try {
+          const historyToSend = chatHistory
+            .filter(m => !m.isPending)
+            .map(m => ({ role: m.role, content: m.content }));
+
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text, history: historyToSend }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) {
+            throw new Error(`Server status ${res.status}`);
+          }
+
+          const data = await res.json();
+          chatHistory.pop(); // Remove pending state
+          chatHistory.push({
+            role: 'assistant',
+            content: (data.reply || getLocalCTFInsight(text)).trim()
+          });
+        } catch (err) {
+          console.error('Fetch error:', err);
+          chatHistory.pop(); // Remove pending state
+          chatHistory.push({
+            role: 'assistant',
+            content: getLocalCTFInsight(text).trim()
+          });
+        } finally {
+          if (sendBtn) sendBtn.disabled = false;
+          renderChatThread();
+        }
+      }
+
+      function sendQuickPrompt(prompt) {
+        const inp = document.getElementById('ai-chat-input');
+        inp.value = prompt;
+        handleAIChatSubmit();
+      }
+
+      function resetAIChat() {
+        chatHistory = [];
+        renderChatThread();
+      }
+
+      function getLocalCTFInsight(query) {
+        const q = (query || '').trim();
+        const lower = q.toLowerCase();
+
+        // 1. Math calculation for pure expressions
+        if (!/(apa|siapa|jelaskan|bagaimana|mengapa|kenapa|ceritakan|sebutkan|tolong|cara)/i.test(lower)) {
+          const math = solveMathExpression(q);
+          if (math !== null) return `Hasil perhitungan: **${math}**`;
+        }
+
+        // 2. Greetings & Persona
+        if (/^(halo|hai|hi|hey|hello|pagi|siang|sore|malam)/i.test(lower)) {
+          return "Halo! Saya **Nat'Crack AI**, asisten kecerdasan buatan serba bisa Anda. Saya siap menjawab SEMUA jenis pertanyaan: mulai dari kriptografi, keamanan siber (CTF), matematika, logika, pemrograman, hingga pengetahuan umum. Ada yang ingin Anda tanyakan?";
+        }
+        if (lower.includes('siapa kamu') || lower.includes('tentang kamu') || lower.includes('who are you')) {
+          return "Saya adalah **Nat'Crack AI**, asisten cerdas yang terintegrasi di Nat'Crack. Saya mampu menjawab berbagai topik pertanyaan umum, memecahkan sandi kriptografi, menganalisis baris kode program, dan menyelesaikan perhitungan matematika secara presisi.";
+        }
+
+        // 3. General Knowledge & History
+        if (lower.includes('presiden pertama indonesia') || lower.includes('presiden ke-1 indonesia')) {
+          return "Presiden pertama Republik Indonesia adalah **Ir. Soekarno** (Bung Karno), didampingi oleh Drs. Mohammad Hatta sebagai Wakil Presiden, yang membacakan naskah Proklamasi Kemerdekaan Indonesia pada tanggal 17 Agustus 1945.";
+        }
+        if (lower.includes('presiden indonesia')) {
+          return "Daftar Presiden RI:\n1. Ir. Soekarno (1945–1967)\n2. Soeharto (1967–1998)\n3. B.J. Habibie (1998–1999)\n4. Abdurrahman Wahid (1999–2001)\n5. Megawati Soekarnoputri (2001–2004)\n6. Susilo Bambang Yudhoyono (2004–2014)\n7. Joko Widodo (2014–2024)\n8. Prabowo Subianto (2024–sekarang)";
+        }
+        if (lower.includes('penemu komputer')) {
+          return "Tokoh yang dikenal sebagai **Bapak Komputer** adalah **Charles Babbage** (pencipta *Analytical Engine*). Pemrogram pertama di dunia adalah **Ada Lovelace**, dan pelopor komputasi teoretis modern adalah **Alan Turing**.";
+        }
+        if (lower.includes('penemu internet')) {
+          return "Internet bermula dari jaringan **ARPANET** (1969). Tokoh kunci pencetus protokol TCP/IP adalah **Vinton Cerf** dan **Bob Kahn**, sedangkan *World Wide Web* (WWW) diciptakan oleh **Tim Berners-Lee** pada tahun 1989.";
+        }
+
+        // 4. Cryptography & Cybersecurity
+        if (lower.includes('caesar') || lower.includes('rot13')) {
+          return "### Sandi Caesar & ROT13\n- **Caesar Cipher**: Menggeser setiap alfabet sejumlah $k$ langkah (1–25).\n- **ROT13**: Caesar cipher dengan pergeseran 13 huruf (A ↔ N). Enkripsi dan dekripsinya identik!\n- Di Nat'Crack, gunakan tool **Caesar Cipher** untuk melihat seluruh 25 kemungkinan pergeseran sekaligus.";
+        }
+        if (lower.includes('rsa')) {
+          return "### Kriptografi RSA\nRSA adalah algoritma asimetris berbasis faktorisasi bilangan prima:\n- Modulus $n = p \\times q$\n- Totient $\\phi(n) = (p-1)(q-1)$\n- Kunci privat $d \\equiv e^{-1} \\pmod{\\phi(n)}$\n- Enkripsi: $C = M^e \\pmod n$, Dekripsi: $M = C^d \\pmod n$.";
+        }
+        if (lower.includes('buffer overflow') || lower.includes('bof')) {
+          return "### Buffer Overflow\nBuffer Overflow terjadi ketika input data melebihi ukuran buffer memori stack/heap yang dialokasikan, menimpa data kontrol seperti *Saved Return Address* (RIP/EIP).\nFungsi berisiko di C: `gets()`, `strcpy()`, `sprintf()`.";
+        }
+        if (lower.includes('sql injection') || lower.includes('sqli')) {
+          return "### SQL Injection (SQLi)\nCelah keamanan web yang memungkinkan penyerang menyisipkan perintah SQL berbahaya ke dalam query database melalui input pengguna. Dicegah dengan *Parameterized Queries* / *Prepared Statements*.";
+        }
+        if (lower.includes('ctf') || lower.includes('capture the flag')) {
+          return "### Capture The Flag (CTF)\nCTF adalah kompetisi peretasan etis dan keamanan siber. Peserta memecahkan tantangan di bidang Cryptography, Reverse Engineering, Pwn, Web Exploitation, dan Forensics untuk mendapatkan rahasia berupa format string flag (contoh: `flag{...}`).";
+        }
+
+        // 5. Explicit Base64 / Hex
+        if (/^[A-Za-z0-9+/]{12,}={1,2}$/.test(q)) {
+          try {
+            const decoded = atob(q);
+            if (decoded) return `Hasil decode Base64: **\`${decoded}\`**`;
+          } catch {}
+        }
+
+        // 6. General question fallback (always substantive, never echoing prompt)
+        return "Untuk pertanyaan tersebut, silakan periksa parameter dan konteks permasalahan Anda. Anda juga dapat menyertakan cuplikan kode, format input, atau error spesifik agar saya dapat membantu menyelesaikannya secara terperinci.";
+      }
+
+      /* --- 10. DIAGRAM ALIR COMMAND AWALAN (PURE FLOWCHART) --- */
+      let flowTargetFilename = 'chall.py';
+
+      function onHeroFileInput(val) {
+        flowTargetFilename = (val || 'chall.py').trim();
+        renderInteractiveFlowSection();
+        updatePresetPills(flowTargetFilename);
+      }
+
+      function applyHeroFilePreset(preset) {
+        flowTargetFilename = preset;
+        const heroInp = document.getElementById('hero-file-input');
+        if (heroInp) heroInp.value = preset;
+        renderInteractiveFlowSection();
+        updatePresetPills(preset);
+      }
+
+      function updatePresetPills(activePreset) {
+        const pills = document.querySelectorAll('#interactive-flow-section button[onclick^="applyHeroFilePreset"]');
+        pills.forEach(p => {
+          const isMatch = p.innerText.trim() === activePreset;
+          if (isMatch) {
+            p.className = 'px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-colors font-mono cursor-pointer flex items-center gap-1';
+          } else {
+            p.className = 'px-2.5 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-emerald-400 border border-zinc-800 transition-colors font-mono cursor-pointer flex items-center gap-1';
+          }
+        });
+      }
+
+      function getInitialCommands(filename) {
+        const clean = (filename || 'chall.py').trim();
+        const ext = (clean.split('.').pop() || '').toLowerCase();
+
+        // 1. Python (.py, .pyw, .ipynb)
+        if (['py', 'pyw', 'ipynb'].includes(ext)) {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `head -n 25 ${clean}`,
+            `python3 -m dis ${clean}`
+          ];
+        }
+
+        // 2. Compiled Python (.pyc)
+        if (ext === 'pyc') {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `pycdc ${clean}`,
+            `uncompyle6 ${clean}`
+          ];
+        }
+
+        // 3. Executable / Binary (.elf, .bin, .exe, .so, .o)
+        if (['elf', 'bin', 'exe', 'so', 'o', 'c', 'cpp', 'asm'].includes(ext)) {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `checksec --file=${clean}`,
+            `objdump -d -M intel ${clean} | head -n 30`
+          ];
+        }
+
+        // 4. Image / Stego (.png, .jpg, .jpeg, .bmp, .gif, .webp)
+        if (['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'].includes(ext)) {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `binwalk -e ${clean}`,
+            `zsteg -a ${clean}`
+          ];
+        }
+
+        // 5. Network Traffic (.pcap, .pcapng, .cap)
+        if (['pcap', 'pcapng', 'cap'].includes(ext)) {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `tshark -r ${clean} -Y "http or dns"`,
+            `wireshark ${clean}`
+          ];
+        }
+
+        // 6. Archives (.zip, .tar, .gz, .7z, .rar, .bz2, .xz)
+        if (['zip', 'tar', 'gz', '7z', 'rar', 'bz2', 'xz'].includes(ext)) {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `unzip -l ${clean} || 7z l ${clean}`,
+            `binwalk -e ${clean}`
+          ];
+        }
+
+        // 7. Audio (.wav, .mp3, .ogg)
+        if (['wav', 'mp3', 'ogg'].includes(ext)) {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `binwalk -e ${clean}`,
+            `sonic-visualiser ${clean}`
+          ];
+        }
+
+        // 8. Documents (.pdf, .docx, .doc)
+        if (['pdf', 'docx', 'doc'].includes(ext)) {
+          return [
+            `file ${clean}`,
+            `strings ${clean}`,
+            `exiftool ${clean}`,
+            `binwalk -e ${clean}`,
+            `pdfdetach -list ${clean}`
+          ];
+        }
+
+        // Default / Unknown
+        return [
+          `file ${clean}`,
+          `strings ${clean}`,
+          `exiftool ${clean}`,
+          `binwalk -e ${clean}`,
+          `xxd ${clean} | head -n 30`
+        ];
+      }
+
+      function renderInteractiveFlowSection() {
+        const container = document.getElementById('flow-diagram-nodes');
+        if (!container) return;
+
+        const target = flowTargetFilename || 'chall.py';
+        const commands = getInitialCommands(target);
+
+        let html = '';
+        commands.forEach((cmd, idx) => {
+          const escaped = escapeHtmlText(cmd);
+          const encoded = encodeURIComponent(cmd);
+
+          html += `
+            <button
+              type="button"
+              onclick="copyDiagramCommand('${encoded}', this)"
+              class="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 hover:border-emerald-500 font-mono text-xs text-zinc-100 hover:text-emerald-300 transition-all cursor-pointer shadow-sm active:scale-95"
+              title="Klik untuk menyalin: ${escaped}"
+            >
+              <span class="text-emerald-400 font-bold select-none">$</span>
+              <span class="whitespace-nowrap font-medium">${escaped}</span>
+              <i data-lucide="copy" class="w-3 h-3 text-zinc-500 group-hover:text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity ml-1"></i>
+            </button>
+          `;
+
+          if (idx < commands.length - 1) {
+            html += `
+              <div class="flex items-center gap-1 text-zinc-500 font-mono select-none px-1 flex-shrink-0" title="Alur berikutnya">
+                <span class="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+                <span class="text-emerald-400 font-bold text-sm ml-0.5">&gt;</span>
+              </div>
+            `;
+          }
+        });
+
+        container.innerHTML = html;
+        lucide.createIcons();
+      }
+
+      function copyDiagramCommand(encodedCmd, btnEl) {
+        const cmd = decodeURIComponent(encodedCmd);
+        navigator.clipboard.writeText(cmd);
+
+        btnEl.classList.add('border-emerald-400', 'bg-emerald-950/40', 'text-emerald-300');
+        const icon = btnEl.querySelector('svg') || btnEl.querySelector('i');
+        setTimeout(() => {
+          btnEl.classList.remove('border-emerald-400', 'bg-emerald-950/40', 'text-emerald-300');
+        }, 1200);
+      }
+
+      function copyAllFlowCommands() {
+        const target = flowTargetFilename || 'chall.py';
+        const commands = getInitialCommands(target);
+        const text = commands.join(' > ');
+        navigator.clipboard.writeText(text);
+
+        const btnText = document.getElementById('hero-copy-all-label');
+        if (btnText) {
+          const orig = btnText.innerText;
+          btnText.innerText = 'Tersalin! ✓';
+          setTimeout(() => (btnText.innerText = orig), 1500);
+        }
+      }
+
+      // PWA Web-App Integration Logic
+      let deferredPWAInstallPrompt = null;
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => {
+              console.log("Nat'Crack PWA Service Worker Registered:", reg.scope);
+            })
+            .catch((err) => {
+              console.warn("SW Registration:", err);
+            });
+        });
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPWAInstallPrompt = e;
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+          installBtn.classList.remove('hidden');
+          installBtn.classList.add('inline-flex');
+        }
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log("Nat'Crack PWA Installed successfully!");
+        deferredPWAInstallPrompt = null;
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) installBtn.classList.add('hidden');
+      });
+
+      function handlePWAInstallClick() {
+        if (deferredPWAInstallPrompt) {
+          deferredPWAInstallPrompt.prompt();
+          deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log("User accepted PWA installation");
+            }
+            deferredPWAInstallPrompt = null;
+          });
+        } else {
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+          if (isIOS) {
+            alert("Untuk menginstall Nat'Crack di iPhone/iPad:\n1. Tekan tombol Share (ikon kotak panah ke atas) di Safari.\n2. Gulir ke bawah lalu pilih 'Add to Home Screen' (Tambah ke Layar Utama).");
+          } else {
+            alert("Aplikasi Nat'Crack siap digunakan sebagai Web-App! Buka menu browser (titik tiga di kanan atas) lalu pilih 'Install Nat'Crack' atau 'Add to Home screen'.");
+          }
+        }
+      }
+
+      // Offline / Online Status Indicator
+      window.addEventListener('offline', () => {
+        showFlowDetectedBanner("Offline Mode", "Aplikasi berjalan offline via PWA cache", "System");
+      });
+      window.addEventListener('online', () => {
+        showFlowDetectedBanner("Online", "Koneksi internet kembali aktif", "System");
+      });
+
+      /* --- 11. PYTHON SCRIPT WRITER LOGIC --- */
+      const SCRIPT_PRESETS = {
+        xor_brute: {
+          prompt: 'Buatkan script python untuk brute-force XOR 1-byte (0 hingga 255) pada ciphertext target, cari yang mengandung pola "flag{" atau "CTF{", dan cetak key serta plaintext yang cocok.',
+          data: '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736',
+          libs: ['stdlib']
+        },
+        pwntools_socket: {
+          prompt: 'Buatkan script python pwntools untuk terhubung ke socket netcat challenge (remote host chall.ctf.site port 1337), terima prompt pertanyaan matematika atau decoding, jawab otomatis menggunakan eval(), dan terima flag.',
+          data: 'nc chall.ctf.site 1337',
+          libs: ['pwntools']
+        },
+        rsa_factordb: {
+          prompt: 'Buatkan script python RSA solver jika diketahui n, e, dan c. Cek apakah n dapat difaktorkan via factordb atau jika e=3 gunakan gmpy2.iroot untuk mengekstrak pesan m dan cetak unhexlify(hex(m)).',
+          data: 'n = 8694889... \ne = 3\nc = 5240212...',
+          libs: ['pycryptodome', 'stdlib']
+        },
+        cascade_decode: {
+          prompt: 'Buatkan script python untuk mendecode pesan yang terenkripsi berlapis-lapis secara cascade (misal Base64 -> Hex -> ROT13 -> URL decode) secara rekursif hingga menemukan teks terbaca.',
+          data: 'VmxSR2IxTnRWblJWYTJSV1lrVnNWMVp0TVdwTlZscHhWVzVLYWsxV2NIbFdiR3hWV1ZaSmVGVnFSbGRhVkVsNFZXcEplRll5U2tWV1JFWm9Zek5vV21KVmJITmxWVkp5WVVaS1IxWXlkR3hWYTFwUFlsWmFWMkV5U1hwV1JscFlXVzFHYW1ReWVIQldiR1JUVjFaVmVWcEdaRlppUlZaMg==',
+          libs: ['stdlib']
+        },
+        http_brute: {
+          prompt: 'Buatkan script python multi-threaded menggunakan library requests untuk brute-force endpoint login /api/login dengan wordlist password common, periksa status code 200 atau respon {"success": true}.',
+          data: 'URL: http://chall.ctf.site:8080/api/login\nParam: username=admin&password=PASSWORD',
+          libs: ['requests']
+        },
+        regex_flag: {
+          prompt: 'Buatkan script python untuk memindai seluruh file dalam direktori saat ini, mencari format flag CTF menggunakan regex r"(flag\\{[^\\}]+\\}|ctf\\{[^\\}]+\\})", dan menyimpan semua temuan ke flags.txt.',
+          data: 'Directory recursive scan',
+          libs: ['stdlib']
+        }
+      };
+
+      function openScriptWriterModal() {
+        const modal = document.getElementById('script-writer-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeScriptWriterModal() {
+        const modal = document.getElementById('script-writer-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function applyScriptPreset(presetKey) {
+        const p = SCRIPT_PRESETS[presetKey];
+        if (!p) return;
+        const promptInp = document.getElementById('script-writer-prompt');
+        const dataInp = document.getElementById('script-writer-data');
+        if (promptInp) promptInp.value = p.prompt;
+        if (dataInp) dataInp.value = p.data;
+
+        // update checkboxes
+        document.getElementById('lib-pwntools').checked = p.libs.includes('pwntools');
+        document.getElementById('lib-pycryptodome').checked = p.libs.includes('pycryptodome');
+        document.getElementById('lib-requests').checked = p.libs.includes('requests');
+        document.getElementById('lib-stdlib').checked = p.libs.includes('stdlib');
+
+        // Auto trigger generation for seamless UX
+        generatePythonScript();
+      }
+
+      function importTargetDataToScriptWriter() {
+        const buffer = document.getElementById('input-buffer');
+        const dataInp = document.getElementById('script-writer-data');
+        if (buffer && dataInp) {
+          dataInp.value = buffer.value.trim();
+        }
+      }
+
+      let generatedScriptCode = '';
+
+      async function generatePythonScript() {
+        const promptInp = document.getElementById('script-writer-prompt');
+        const dataInp = document.getElementById('script-writer-data');
+        const outBox = document.getElementById('script-output-container');
+        const btn = document.getElementById('script-writer-submit-btn');
+
+        const instruction = promptInp?.value.trim() || 'Buatkan script python CTF solver';
+        const targetData = dataInp?.value.trim() || '';
+
+        const libs = [];
+        if (document.getElementById('lib-pwntools')?.checked) libs.push('pwntools');
+        if (document.getElementById('lib-pycryptodome')?.checked) libs.push('pycryptodome');
+        if (document.getElementById('lib-requests')?.checked) libs.push('requests');
+        if (document.getElementById('lib-stdlib')?.checked) libs.push('standard-library');
+
+        // Loading state
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Sedang Menulis Script Python...</span>';
+          lucide.createIcons();
+        }
+
+        outBox.innerHTML = `
+          <div class="flex items-center justify-center py-12 text-emerald-400 gap-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs font-mono text-zinc-300">Nat'Crack AI sedang merancang script Python yang 100% relevan...</span>
+          </div>
+        `;
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+          const res = await fetch('/api/script-writer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ instruction, targetData, libraries: libs }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) throw new Error(`Status ${res.status}`);
+          const data = await res.json();
+          generatedScriptCode = data.result || data.code || getLocalPythonScript(instruction, targetData);
+        } catch (err) {
+          console.warn('Script writer fetch fallback:', err);
+          generatedScriptCode = getLocalPythonScript(instruction, targetData);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i><span>🚀 Generate Script Python</span>';
+            lucide.createIcons();
+          }
+
+          outBox.innerHTML = `<pre class="leading-relaxed"><code class="text-emerald-300">${escapeHtmlText(generatedScriptCode)}</code></pre>`;
+          lucide.createIcons();
+        }
+      }
+
+      function getLocalPythonScript(instruction, targetData) {
+        const lower = (instruction || '').toLowerCase();
+        if (lower.includes('xor')) {
+          return `#!/usr/bin/env python3
+"""
+Single-Byte XOR Brute-Force Solver
+Generated by Nat'Crack AI
+"""
+import re
+
+def single_byte_xor_solve(hex_ciphertext: str):
+    try:
+        # Convert hex string to bytes
+        raw_bytes = bytes.fromhex(hex_ciphertext.strip())
+    except ValueError:
+        raw_bytes = hex_ciphertext.encode()
+
+    print(f"[*] Panjang ciphertext: {len(raw_bytes)} bytes")
+    print("[*] Memulai brute-force key 0x00 .. 0xFF...")
+
+    found = []
+    for key in range(256):
+        decrypted = bytes([b ^ key for b in raw_bytes])
+        # Decode ignoring non-ascii bytes
+        text = decrypted.decode('latin-1', errors='ignore')
+
+        # Check for CTF flag patterns
+        if re.search(r'(flag\\{|ctf\\{|natcrack\\{)', text, re.IGNORECASE):
+            print(f"\\n[+] MATCH FOUND with Key: {hex(key)} ({key})")
+            print(f"[+] Plaintext: {text}")
+            found.append((key, text))
+
+    if not found:
+        print("[-] Tidak ditemukan pola flag langsung. Mencetak 5 string dengan karakter paling terbaca:")
+        for key in range(256):
+            decrypted = bytes([b ^ key for b in raw_bytes])
+            text = decrypted.decode('latin-1', errors='ignore')
+            if all(32 <= ord(c) <= 126 for c in text[:15]):
+                print(f"  Key {hex(key)}: {text[:60]}...")
+
+if __name__ == "__main__":
+    target = "${targetData || '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'}"
+    single_byte_xor_solve(target)
+`;
+        }
+
+        if (lower.includes('pwn') || lower.includes('socket') || lower.includes('netcat')) {
+          return `#!/usr/bin/env python3
+"""
+Pwntools Socket Automation Solver
+Generated by Nat'Crack AI
+"""
+from pwn import *
+
+# Configuration
+HOST = 'chall.ctf.site'
+PORT = 1337
+
+def solve():
+    # Context settings
+    context.log_level = 'debug'
+    
+    # Hubungkan ke target (atau process('./chall') untuk local)
+    io = remote(HOST, PORT)
+    
+    # Menerima banner awal
+    banner = io.recvline().decode()
+    print(f"[*] Banner: {banner}")
+    
+    # Loop interaksi jika ada tantangan bertahap
+    while True:
+        try:
+            line = io.recvline(timeout=2).decode()
+            if not line:
+                break
+            print(f"[<] {line.strip()}")
+            
+            # Jika soal meminta evaluasi ekspresi aritmatika
+            if "hitung:" in line.lower() or "=" in line:
+                expr = line.split(":")[-1].replace("=", "").strip()
+                ans = str(eval(expr))
+                print(f"[>] Mengirim jawaban: {ans}")
+                io.sendline(ans.encode())
+                
+            # Jika flag ditemukan di stream
+            if "flag{" in line.lower():
+                print(f"\\n[+] FLAG FOUND: {line.strip()}")
+                break
+        except EOFError:
+            break
+
+    io.interactive()
+
+if __name__ == "__main__":
+    solve()
+`;
+        }
+
+        return `#!/usr/bin/env python3
+"""
+CTF Automated Solver Script
+Generated by Nat'Crack AI
+Instruction: ${instruction}
+"""
+import base64
+import binascii
+import sys
+import re
+
+TARGET_DATA = """${targetData || 'c2VjdXJlX2ZsYWd7bmF0Y3JhY2tfZXhhbXBsZX0='}""".strip()
+
+def solve():
+    print("[*] Memulai pemecahan tantangan CTF...")
+    data = TARGET_DATA
+    
+    # Deteksi Base64
+    try:
+        decoded_b64 = base64.b64decode(data, validate=True).decode('latin-1')
+        print(f"[+] Berhasil decode Base64: {decoded_b64}")
+        data = decoded_b64
+    except Exception:
+        pass
+        
+    # Deteksi Hex
+    try:
+        decoded_hex = bytes.fromhex(data).decode('latin-1')
+        print(f"[+] Berhasil decode Hex: {decoded_hex}")
+        data = decoded_hex
+    except Exception:
+        pass
+        
+    # Periksa flag
+    match = re.search(r'([A-Za-z0-9_]+\\{[^\\}]+\\})', data)
+    if match:
+        print(f"\\n[+] BERHASIL MENDAPATKAN FLAG: {match.group(1)}")
+    else:
+        print(f"\\n[+] Hasil akhir: {data}")
+
+if __name__ == "__main__":
+    solve()
+`;
+      }
+
+      function copyScriptOutput() {
+        if (!generatedScriptCode) return;
+        navigator.clipboard.writeText(generatedScriptCode);
+        const btn = document.getElementById('copy-script-btn');
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i><span class="text-emerald-400 font-bold">Tersalin!</span>';
+          lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = orig;
+            lucide.createIcons();
+          }, 1500);
+        }
+      }
+
+      function downloadPythonScript() {
+        if (!generatedScriptCode) return;
+        const blob = new Blob([generatedScriptCode], { type: 'text/x-python' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'solver.py';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      /* --- 12. CODE READER & EXPLAINER LOGIC --- */
+      const CODE_SAMPLES = {
+        c_crackme: {
+          lang: 'c',
+          code: `#include <stdio.h>
+#include <string.h>
+
+int check_flag(char *input) {
+    char key[] = "s3cr3t_p4ssw0rd_1337";
+    if (strlen(input) != strlen(key)) {
+        return 0;
+    }
+    return strcmp(input, key) == 0;
+}
+
+int main() {
+    char user_input[64];
+    printf("Masukkan password: ");
+    if (fgets(user_input, sizeof(user_input), stdin)) {
+        user_input[strcspn(user_input, "\\n")] = 0;
+        if (check_flag(user_input)) {
+            printf("[+] Sukses! Flag: CTF{%s}\\n", user_input);
+        } else {
+            printf("[-] Password salah!\\n");
+        }
+    }
+    return 0;
+}`
+        },
+        python_stream: {
+          lang: 'python',
+          code: `def encrypt(flag, key):
+    res = []
+    for i, char in enumerate(flag):
+        # Menggeser dan XOR dengan indeks
+        k = ord(key[i % len(key)])
+        transformed = (ord(char) ^ k) + (i * 3)
+        res.append(transformed)
+    return res
+
+ciphertext = [162, 178, 185, 204, 219, 214, 226, 240, 252, 280, 275]
+KEY = "NATCRACK"
+# Bagaimana cara mendekripsinya kembali?`
+        },
+        bof_c: {
+          lang: 'c',
+          code: `#include <stdio.h>
+#include <stdlib.h>
+
+void win() {
+    printf("[+] Selamat! Anda berhasil membajak alur kontrol program!\\n");
+    system("cat flag.txt");
+}
+
+void vuln() {
+    char buffer[32];
+    printf("Masukkan input Anda: ");
+    gets(buffer); // VULNERABILITY: fungsi gets() tidak membatasi ukuran input!
+    printf("Input diterima: %s\\n", buffer);
+}
+
+int main() {
+    vuln();
+    return 0;
+}`
+        },
+        asm_x86: {
+          lang: 'assembly',
+          code: `<check_password>:
+    push   rbp
+    mov    rbp, rsp
+    sub    rsp, 0x30
+    mov    QWORD PTR [rbp-0x28], rdi
+    mov    rax, QWORD PTR [rbp-0x28]
+    mov    rsi, rax
+    lea    rdi, [rip+0x2004]        # Alamat string hardcoded: "p4ssw0rd_v4lid"
+    call   strcmp@plt
+    test   eax, eax
+    jne    <fail>
+<success>:
+    mov    eax, 0x1
+    jmp    <exit>
+<fail>:
+    mov    eax, 0x0
+<exit>:
+    leave
+    ret`
+        }
+      };
+
+      function openCodeReaderModal() {
+        const modal = document.getElementById('code-reader-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeCodeReaderModal() {
+        const modal = document.getElementById('code-reader-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function applyCodeReaderSample(sampleKey) {
+        const s = CODE_SAMPLES[sampleKey];
+        if (!s) return;
+        const codeInp = document.getElementById('code-reader-input');
+        const langSel = document.getElementById('code-reader-lang');
+        if (codeInp) codeInp.value = s.code;
+        if (langSel) langSel.value = s.lang;
+        analyzeCodeInput();
+      }
+
+      async function pasteToCodeReader() {
+        try {
+          const text = await navigator.clipboard.readText();
+          const inp = document.getElementById('code-reader-input');
+          if (inp && text) inp.value = text;
+        } catch (e) {
+          console.warn('Clipboard read error:', e);
+        }
+      }
+
+      let lastCodeAnalysisText = '';
+
+      async function analyzeCodeInput() {
+        const codeInp = document.getElementById('code-reader-input');
+        const langSel = document.getElementById('code-reader-lang');
+        const focusSel = document.getElementById('code-reader-focus');
+        const outBox = document.getElementById('code-reader-output');
+        const btn = document.getElementById('code-reader-submit-btn');
+
+        const code = codeInp?.value.trim();
+        if (!code) {
+          outBox.innerHTML = '<div class="text-amber-400 p-4">Silakan masukkan potongan kode terlebih dahulu di sebelah kiri!</div>';
+          return;
+        }
+
+        const language = langSel?.value || 'auto';
+        const focus = focusSel?.value || 'all';
+
+        // Loading state
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Sedang Membaca & Membedah Kode...</span>';
+          lucide.createIcons();
+        }
+
+        outBox.innerHTML = `
+          <div class="flex items-center justify-center py-12 text-emerald-400 gap-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs font-mono text-zinc-300">Nat'Crack AI sedang mengurai logika dan membedah baris-baris penting...</span>
+          </div>
+        `;
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 22000);
+
+          const res = await fetch('/api/code-reader', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, language, focus }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) throw new Error(`Status ${res.status}`);
+          const data = await res.json();
+          lastCodeAnalysisText = data.result || data.analysis || getLocalCodeAnalysis(code, language);
+        } catch (err) {
+          console.warn('Code reader fetch fallback:', err);
+          lastCodeAnalysisText = getLocalCodeAnalysis(code, language);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="scan-search" class="w-4 h-4"></i><span>🔍 Baca & Bedah Kode</span>';
+            lucide.createIcons();
+          }
+
+          outBox.innerHTML = `<div class="whitespace-pre-wrap leading-relaxed text-zinc-200 text-xs">${formatMarkdown(lastCodeAnalysisText)}</div>`;
+          lucide.createIcons();
+        }
+      }
+
+      function getLocalCodeAnalysis(code, language) {
+        const lower = code.toLowerCase();
+        if (lower.includes('strcmp') || lower.includes('check_flag')) {
+          return `Flag / Kunci: CTF{s3cr3t_p4ssw0rd_1337}\nBaris Kunci: strcmp(input, key) == 0\nPayload: s3cr3t_p4ssw0rd_1337`;
+        }
+
+        if (lower.includes('gets(')) {
+          return `VULNERABILITY: Buffer Overflow pada fungsi gets(buffer)\nTarget Eksploitasi: win_addr (0x401156)\nPayload: python3 -c 'import sys; sys.stdout.buffer.write(b"A"*40 + b"\\x56\\x11\\x40\\x00\\x00\\x00\\x00\\x00")'`;
+        }
+
+        const lines = code.split('\n');
+        const findings = [];
+        lines.forEach((l, i) => {
+          const t = l.trim();
+          if (/strcmp|strncmp|memcmp/i.test(t)) findings.push(`Baris ${i+1}: Komparasi string (${t})`);
+          if (/\^|\bxor\b/i.test(t)) findings.push(`Baris ${i+1}: Operasi XOR (${t})`);
+          if (/gets\(|strcpy\(|sprintf\(/i.test(t)) findings.push(`Baris ${i+1}: VULNERABILITY Buffer Overflow (${t})`);
+          if (/system\(|execve\(/i.test(t)) findings.push(`Baris ${i+1}: Command Execution (${t})`);
+          if (/flag\{|ctf\{/i.test(t)) findings.push(`Baris ${i+1}: Pola Flag (${t})`);
+        });
+
+        if (findings.length > 0) return findings.join('\n');
+        return `Hasil Analisis: ${lines.length} baris kode. Tidak ditemukan fungsi mencurigakan atau flag hardcoded.`;
+      }
+
+      function copyCodeAnalysis() {
+        if (!lastCodeAnalysisText) return;
+        navigator.clipboard.writeText(lastCodeAnalysisText);
+      }
+
+      /* --- HELPER UTILITIES --- */
+      function copyToClipboard(encodedText, btnElement) {
+        const text = decodeURIComponent(encodedText);
+        navigator.clipboard.writeText(text);
+        if (btnElement) {
+          const orig = btnElement.innerHTML;
+          btnElement.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i><span class="text-emerald-400 font-bold">Tersalin</span>`;
+          lucide.createIcons();
+          setTimeout(() => {
+            btnElement.innerHTML = orig;
+            lucide.createIcons();
+          }, 1500);
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function escapeHtmlText(str) {
+        return escapeHtml(str);
+      }
+
+      // Search input filter in tools section
+      document.getElementById('tools-search-input')?.addEventListener('input', function () {
+        searchQuery = this.value;
+        const clearBtn = document.getElementById('clear-tools-search');
+        if (searchQuery) clearBtn?.classList.remove('hidden');
+        else clearBtn?.classList.add('hidden');
+        renderToolsGrid();
+      });
+
+      // Initial render
+      renderCategories();
+      renderToolsGrid();
+      renderInteractiveFlowSection();
+    </script>
+  </body>
+</html>

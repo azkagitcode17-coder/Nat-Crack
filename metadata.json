@@ -1,0 +1,6 @@
+{
+  "name": "Nat'Crack",
+  "description": "CTF Utility Box - Decoder, converter, dan solver instan untuk kompetisi CTF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

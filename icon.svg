@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#0e1726" />
+      <stop offset="100%" stop-color="#070a0f" />
+    </radialGradient>
+    <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="shackleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#86efac" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#22c55e" stroke-width="4" stroke-opacity="0.25" />
+
+  <path d="M256 36 V72 M256 440 V476 M36 256 H72 M440 256 H476" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-opacity="0.3" />
+
+  <!-- Padlock Shackle -->
+  <path d="M 184 220 V 164 C 184 124 216 92 256 92 C 296 92 328 124 328 164 V 180" 
+        fill="none" 
+        stroke="url(#shackleGrad)" 
+        stroke-width="28" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        filter="url(#emeraldGlow)" />
+
+  <!-- Padlock Main Body -->
+  <rect x="140" y="212" width="232" height="196" rx="36" fill="#0f172a" stroke="url(#neonGrad)" stroke-width="12" filter="url(#emeraldGlow)" />
+
+  <!-- CTF Flag Curly Brackets { } -->
+  <path d="M 194 266 C 182 266 174 274 174 286 V 298 C 174 306 166 310 158 310 C 166 310 174 314 174 322 V 334 C 174 346 182 354 194 354" 
+        fill="none" 
+        stroke="#4ade80" 
+        stroke-width="9" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" />
+
+  <path d="M 318 266 C 330 266 338 274 338 286 V 298 C 338 306 346 310 354 310 C 346 310 338 314 338 322 V 334 C 338 346 330 354 318 354" 
+        fill="none" 
+        stroke="#4ade80" 
+        stroke-width="9" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" />
+
+  <!-- Center Keyhole -->
+  <circle cx="256" cy="292" r="18" fill="#22c55e" filter="url(#emeraldGlow)" />
+  <path d="M 248 296 L 244 336 C 244 340 248 344 256 344 C 264 344 268 340 268 336 L 264 296 Z" fill="#22c55e" />
+
+  <!-- Binary Pattern -->
+  <circle cx="218" cy="380" r="3" fill="#22c55e" fill-opacity="0.6" />
+  <circle cx="236" cy="380" r="3" fill="#22c55e" fill-opacity="0.9" />
+  <circle cx="256" cy="380" r="3" fill="#4ade80" />
+  <circle cx="276" cy="380" r="3" fill="#22c55e" fill-opacity="0.9" />
+  <circle cx="294" cy="380" r="3" fill="#22c55e" fill-opacity="0.6" />
+</svg>

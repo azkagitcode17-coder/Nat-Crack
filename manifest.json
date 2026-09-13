@@ -1,0 +1,39 @@
+{
+  "id": "/",
+  "name": "Nat'Crack - CTF Toolkit",
+  "short_name": "Nat'Crack",
+  "description": "CTF Utility Box - Decoder, converter, reverse engineering & forensics triage, dan solver instan.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090d12",
+  "theme_color": "#090d12",
+  "categories": ["utilities", "security", "developer"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
